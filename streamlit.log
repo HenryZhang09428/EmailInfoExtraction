@@ -1,0 +1,600 @@
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8503
+  Network URL: http://26.26.26.1:8503
+
+2026-01-28 15:46:34 | INFO     | core.llm | LLMClient initialized with model=gpt-4o-mini, vision_model=gpt-4o-mini
+2026-01-28 15:46:34 | INFO     | core.pipeline | run_extract: Processing 2 files: ['/var/folders/f1/j8wpcj5x1rggjmh90_yb6xjw0000gn/T/email_extraction_6ek8qx2t/源1：仕邦_入职.xlsx', '/var/folders/f1/j8wpcj5x1rggjmh90_yb6xjw0000gn/T/email_extraction_6ek8qx2t/源2：仕邦_离职.xlsx']
+2026-01-28 15:46:41 | INFO     | core.extractors.excel_extractor | Successfully extracted JSON, keys: ['data', 'metadata']
+2026-01-28 15:46:41 | INFO     | core.pipeline | Excel extraction completed for 源1：仕邦_入职.xlsx
+2026-01-28 15:46:49 | INFO     | core.extractors.excel_extractor | Successfully extracted JSON, keys: ['data', 'metadata']
+2026-01-28 15:46:49 | INFO     | core.pipeline | Excel extraction completed for 源2：仕邦_离职.xlsx
+2026-01-28 15:46:49 | INFO     | core.pipeline | Queue processing complete. Total processed: 2 docs
+2026-01-28 15:46:49 | INFO     | core.pipeline | IR created with 2 sources
+2026-01-28 15:48:31 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 15:48:31 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 15:48:31 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 15:48:31 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 15:48:31 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 15:48:31 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 15:48:31 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 15:48:31 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 15:48:31 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 15:48:31 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 15:48:31 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 15:48:31 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 15:48:31.613 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 15:48:31.619 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 投保基数 with type object')
+2026-01-28 15:48:58 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 15:48:58 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 15:48:58 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 15:48:58 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 15:48:58 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 15:48:58 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 15:48:58 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 15:48:58 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 15:48:58 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 15:48:58 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 15:48:58 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 15:48:59 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 15:48:59.185 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 15:48:59.186 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 15:49:21 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 15:49:21 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 15:49:21 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 15:49:21 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 15:49:21 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 15:49:21 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 15:49:21 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 15:49:21 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 15:49:21 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 15:49:21 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 15:49:21 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 15:49:21 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 15:49:22.015 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 15:49:22.017 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 15:49:49 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 15:49:49 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 15:49:49 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 15:49:49 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 15:49:49 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 15:49:49 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 15:49:49 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 15:49:49 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 15:49:49 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 15:49:49 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 15:49:49 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 15:49:49 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 15:49:49.404 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 15:49:49.406 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 16:52:16 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:52:16 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:52:16 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 16:52:16 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 16:52:16 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 16:52:16 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:52:16 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:52:16 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:52:16 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:52:16 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:52:16 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:52:16 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:52:16.871 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:52:16.873 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 16:52:29.774 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:52:29.775 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 16:52:37.937 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:52:37.939 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 16:52:56 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:52:56 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:52:56 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 16:52:56 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 16:52:56 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 16:52:56 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:52:56 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:52:56 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:52:56 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:52:56 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:52:56 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:52:56 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:52:56.556 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:53:12 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:53:12 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:53:12 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 16:53:12 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 16:53:12 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 16:53:12 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:53:12 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:53:12 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:53:12 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:53:12 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:53:12 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:53:12 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:53:12.978 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:53:19.168 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:53:26.487 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:53:35 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:53:35 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:53:35 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 16:53:35 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 16:53:35 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 16:53:35 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:53:35 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:53:35 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:53:35 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:53:35 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:53:35 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:53:35 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:53:35.427 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:54:47.370 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:54:51.501 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:55:08 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:55:08 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:55:08 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 16:55:08 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 16:55:08 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 16:55:08 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:55:08 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:55:08 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:55:08 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:55:08 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:55:08 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:55:08 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:55:08.853 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:59:28 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:59:28 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:59:28 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 16:59:28 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 16:59:28 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 16:59:28 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:59:28 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:59:28 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:59:28 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:59:28 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:59:28 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:59:28 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:59:29.185 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:59:44 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:59:44 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:59:44 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 16:59:44 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 16:59:44 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 16:59:44 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:59:44 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:59:44 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:59:44 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:59:44 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:59:44 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:59:44 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:59:45.263 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:59:48.824 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 16:59:58 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 16:59:58 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 16:59:58 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 16:59:58 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 16:59:58 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 16:59:58 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 16:59:58 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 16:59:58 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 16:59:58 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 16:59:58 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 16:59:58 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 16:59:58 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 16:59:59.115 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:04:55 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 17:04:55 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 17:04:55 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=3 items
+2026-01-28 17:04:55 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 17:04:55 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=3
+2026-01-28 17:04:55 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=3, rows=3
+2026-01-28 17:04:55 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 17:04:55 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 17:04:55 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 17:04:55 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=15
+2026-01-28 17:04:55 | INFO     | core.template.writer | apply_fill_plan: total cells_written=15
+2026-01-28 17:04:55 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 17:04:55.883 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:04:55.884 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 17:05:15.033 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:05:15.034 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 17:05:17.300 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:05:17.302 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 17:05:24.312 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:05:24.314 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 17:05:28.325 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:05:28.327 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in dataframe_to_arrays
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 613, in <listcomp>
+    arrays = [convert_column(c, f)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64", 'Conversion failed for column 费用年月 with type object')
+2026-01-28 17:05:36 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 17:05:36 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 17:05:36 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=3 items, constant_values=2 items
+2026-01-28 17:05:36 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 3 of 3 header mappings
+2026-01-28 17:05:36 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=3, constant_column_mapping=2
+2026-01-28 17:05:36 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 17:05:36 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 17:05:36 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 17:05:36 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 17:05:36 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=15
+2026-01-28 17:05:36 | INFO     | core.template.writer | apply_fill_plan: total cells_written=15
+2026-01-28 17:05:36 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 17:05:36.688 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:05:36.692 Serialization of dataframe to Arrow table was unsuccessful. Applying automatic fixes for column types to make the dataframe Arrow-compatible.
+Traceback (most recent call last):
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/streamlit/dataframe_util.py", line 822, in convert_pandas_df_to_arrow_bytes
+    table = pa.Table.from_pandas(df)
+  File "pyarrow/table.pxi", line 3869, in pyarrow.lib.Table.from_pandas
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 626, in dataframe_to_arrays
+    arrays[i] = maybe_fut.result()
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/concurrent/futures/_base.py", line 439, in result
+    return self.__get_result()
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/concurrent/futures/_base.py", line 391, in __get_result
+    raise self._exception
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 600, in convert_column
+    raise e
+  File "/Users/zhanghengyu/opt/anaconda3/lib/python3.9/site-packages/pyarrow/pandas_compat.py", line 594, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 340, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 86, in pyarrow.lib._ndarray_to_array
+  File "pyarrow/error.pxi", line 91, in pyarrow.lib.check_status
+pyarrow.lib.ArrowTypeError: ("object of type <class 'str'> cannot be converted to int", 'Conversion failed for column 变动原因 with type object')
+2026-01-28 17:09:04 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 17:09:04 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 17:09:04 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=2 items, constant_values=2 items
+2026-01-28 17:09:04 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 2 of 2 header mappings
+2026-01-28 17:09:04 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=2, constant_column_mapping=2
+2026-01-28 17:09:04 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 17:09:04 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 17:09:04 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 17:09:04 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 17:09:04 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 17:09:04 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 17:09:04 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 17:09:04.835 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:09:29.008 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:09:37.059 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:09:45 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 17:09:45 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 17:09:45 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 17:09:45 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 17:09:45 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 17:09:45 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 17:09:45 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 17:09:45 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 17:09:45 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 17:09:45 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 17:09:45 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 17:09:45 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 17:09:45.656 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-01-28 17:10:06 | INFO     | core.pipeline | run_extract: Processing 2 files: ['/var/folders/f1/j8wpcj5x1rggjmh90_yb6xjw0000gn/T/email_extraction_hgrujbvd/源1：仕邦_入职.xlsx', '/var/folders/f1/j8wpcj5x1rggjmh90_yb6xjw0000gn/T/email_extraction_hgrujbvd/源2：仕邦_离职.xlsx']
+2026-01-28 17:10:13 | INFO     | core.extractors.excel_extractor | Successfully extracted JSON, keys: ['data', 'metadata']
+2026-01-28 17:10:13 | INFO     | core.pipeline | Excel extraction completed for 源1：仕邦_入职.xlsx
+2026-01-28 17:10:25 | INFO     | core.extractors.excel_extractor | Successfully extracted JSON, keys: ['data', 'metadata']
+2026-01-28 17:10:25 | INFO     | core.pipeline | Excel extraction completed for 源2：仕邦_离职.xlsx
+2026-01-28 17:10:25 | INFO     | core.pipeline | Queue processing complete. Total processed: 2 docs
+2026-01-28 17:10:25 | INFO     | core.pipeline | IR created with 2 sources
+2026-01-28 17:10:40 | INFO     | core.template.fill_planner | plan_fill: LLM response type: dict
+2026-01-28 17:10:40 | INFO     | core.template.fill_planner | plan_fill: LLM response keys: ['column_mapping', 'constant_values']
+2026-01-28 17:10:40 | INFO     | core.template.fill_planner | plan_fill: Parsed column_mapping=4 items, constant_values=2 items
+2026-01-28 17:10:40 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Matched 4 of 4 header mappings
+2026-01-28 17:10:40 | INFO     | core.template.fill_planner | _build_fill_plan_from_mapping: Final column_mapping=4, constant_column_mapping=2
+2026-01-28 17:10:40 | INFO     | core.pipeline | fill_template: plan llm_used=True, constant_values_count=2, rows=3
+2026-01-28 17:10:40 | WARNING  | core.template.writer | Date parsing failed for value '42700995', keeping as string
+2026-01-28 17:10:40 | WARNING  | core.template.writer | Date parsing failed for value '42701000', keeping as string
+2026-01-28 17:10:40 | WARNING  | core.template.writer | Date parsing failed for value '42701061', keeping as string
+2026-01-28 17:10:40 | INFO     | core.template.writer | apply_fill_plan: Finished writing 3 rows, total cells_written=12
+2026-01-28 17:10:40 | INFO     | core.template.writer | apply_fill_plan: total cells_written=12
+2026-01-28 17:10:40 | INFO     | core.pipeline | fill_template: Final plan llm_used=True
+2026-01-28 17:10:40.912 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.

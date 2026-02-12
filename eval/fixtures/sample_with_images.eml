@@ -1,0 +1,28 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Test Email with Inline Image
+Date: Mon, 1 Jan 2024 12:00:00 +0000
+Message-ID: <test123@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/related; boundary="boundary123"
+
+--boundary123
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<html>
+<body>
+<p>This is a test email with an inline image:</p>
+<img src="cid:image001@example.com" alt="Test Image">
+<p>End of email.</p>
+</body>
+</html>
+
+--boundary123
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-ID: <image001@example.com>
+Content-Disposition: inline; filename="test.png"
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
+--boundary123--

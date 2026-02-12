@@ -1,0 +1,12 @@
+profile_id: "ss_profile_v1"
+
+excel:
+  sheet: "人员参保登记报盘模版"
+
+templates:
+  - key: "add"
+    template_path: "app/templates/目标1模版：社保增员表.xlsx"
+    fill_columns: [“A","B","C","D"]
+    special_field_to_column:
+      证件号码: "B"
+      身份证号码: "B"
