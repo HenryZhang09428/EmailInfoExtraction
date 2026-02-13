@@ -15,32 +15,39 @@ logger = get_logger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE_DIR = REPO_ROOT / "app" / "templates"
 
-TEMPLATE_ADD_NAME = "目标1模版：社保增员表.xlsx"
-TEMPLATE_REMOVE_NAME = "目标2模版：社保减员表.xlsx"
-
-FALLBACK_ADD_PATH = Path("/Users/zhanghengyu/Desktop/目标1模版：社保增员表.xlsx")
-FALLBACK_REMOVE_PATH = Path("/Users/zhanghengyu/Desktop/目标2模版：社保减员表.xlsx")
+DEFAULT_TEMPLATE_ADD_NAME = "目标1模版：社保增员表.xlsx"
+DEFAULT_TEMPLATE_REMOVE_NAME = "目标2模版：社保减员表.xlsx"
 
 
 def resolve_template_paths() -> Dict[str, Path]:
+    add_name = os.getenv("TEMPLATE_ADD_NAME", DEFAULT_TEMPLATE_ADD_NAME)
+    remove_name = os.getenv("TEMPLATE_REMOVE_NAME", DEFAULT_TEMPLATE_REMOVE_NAME)
     templates = {
-        "add": TEMPLATE_DIR / TEMPLATE_ADD_NAME,
-        "remove": TEMPLATE_DIR / TEMPLATE_REMOVE_NAME,
+        "add": _resolve_template_path_from_env_or_default("add", add_name),
+        "remove": _resolve_template_path_from_env_or_default("remove", remove_name),
     }
     resolved = {}
     for key, path in templates.items():
         if path.exists():
             resolved[key] = path
             continue
-        fallback = FALLBACK_ADD_PATH if key == "add" else FALLBACK_REMOVE_PATH
-        if fallback.exists():
-            logger.warning("Embedded template missing, using fallback: %s", fallback)
-            resolved[key] = fallback
-            continue
+        env_key = f"TEMPLATE_{key.upper()}_PATH"
         raise FileNotFoundError(
-            f"Template not found for {key}. Missing both {path} and {fallback}."
+            f"Template not found for {key}: {path}. "
+            f"Set {env_key} to override template path."
         )
     return resolved
+
+
+def _resolve_template_path_from_env_or_default(template_key: str, template_name: str) -> Path:
+    env_key = f"TEMPLATE_{template_key.upper()}_PATH"
+    env_path = os.getenv(env_key, "").strip()
+    if env_path:
+        path = Path(env_path).expanduser()
+        if not path.is_absolute():
+            path = (REPO_ROOT / path).resolve()
+        return path
+    return TEMPLATE_DIR / template_name
 
 
 def ensure_output_dir(output_dir: str) -> Path:
@@ -262,10 +269,25 @@ def process_files(
     return build_readable_output(ir, fill_results, file_paths, str(output_path))
 
 
-def write_json_output(result: Dict[str, Any], output_dir: str) -> str:
+def _resolve_output_json_name(output_filename: Optional[str] = None) -> str:
+    if output_filename and output_filename.strip():
+        return output_filename.strip()
+    env_output_name = os.getenv("OUTPUT_JSON_NAME", "").strip()
+    if env_output_name:
+        return env_output_name
+    if os.getenv("OUTPUT_JSON_TIMESTAMP", "").strip().lower() in {"1", "true", "yes", "on"}:
+        return f"result_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    return "result.json"
+
+
+def write_json_output(
+    result: Dict[str, Any],
+    output_dir: str,
+    output_filename: Optional[str] = None,
+) -> str:
     output_path = Path(output_dir).resolve()
     output_path.mkdir(parents=True, exist_ok=True)
-    json_path = output_path / "result.json"
+    json_path = output_path / _resolve_output_json_name(output_filename)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2, default=str)
     return str(json_path)

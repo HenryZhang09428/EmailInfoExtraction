@@ -12,7 +12,6 @@ from core.prompts_loader import get_prompts
 from core.router import route_files
 from core.ir import IntermediateRepresentation, Fact, SourceDoc, SourceBlock, BlockType
 from core.extractors import ExcelExtractor, EmailExtractor, ImageExtractor
-from core.mapping.validator import validate
 from core.logger import get_logger
 
 logger = get_logger(__name__)
@@ -50,9 +49,32 @@ def _extract_single_doc(
         extractor = ExcelExtractor(llm, prompts)
         result = extractor.safe_extract(
             file_path,
-            extract_all_sheets=bool(source_doc.parent_source_id),
+            extract_all_sheets=False,
             preferred_sheet=excel_sheet,
         )
+        extracted_payload = result.extracted if isinstance(result.extracted, dict) else {}
+        extracted_rows = extracted_payload.get("data") if isinstance(extracted_payload, dict) else None
+        extracted_rows_count = len(extracted_rows) if isinstance(extracted_rows, list) else 0
+        if extracted_rows_count == 0 and excel_sheet is None:
+            logger.info(
+                "Excel extraction returned 0 rows for %s; retrying with extract_all_sheets=True",
+                source_doc.filename
+            )
+            retry_result = extractor.safe_extract(
+                file_path,
+                extract_all_sheets=True,
+                preferred_sheet=excel_sheet,
+            )
+            retry_payload = retry_result.extracted if isinstance(retry_result.extracted, dict) else {}
+            retry_rows = retry_payload.get("data") if isinstance(retry_payload, dict) else None
+            retry_rows_count = len(retry_rows) if isinstance(retry_rows, list) else 0
+            if retry_rows_count > 0:
+                logger.info(
+                    "Excel all-sheets retry recovered %d rows for %s",
+                    retry_rows_count,
+                    source_doc.filename
+                )
+                result = retry_result
         
         source_doc.blocks = result.blocks
         source_doc.extracted = result.extracted
@@ -678,7 +700,3 @@ if __name__ == "__main__":
     sig_b = build_stable_ir_signature(ir_b)
     assert sig_a == sig_b, "Stable signature mismatch for equivalent IRs"
     print("build_stable_ir_signature smoke test passed.")
-
-def update_ir_scores(ir: IntermediateRepresentation, final_json: Union[dict, list], attribute_set: List[dict]) -> None:
-    validation_result = validate(final_json, attribute_set)
-    ir.scores = validation_result

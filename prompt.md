@@ -76,12 +76,6 @@ Robustness:
 - If you are unsure about a field, still include the record with what you know.
 - Put ambiguity notes into `warnings`.
 
-## ATTRIBUTE_SET_PROMPT
-Based on the header rows and sample data provided, generate an attribute set definition. Each attribute should include: name, type (string/number/date), and whether it's required. Return a JSON array of attribute definitions.
-
-## FINAL_MAPPING_PROMPT
-Map the extracted information to the target schema based on the attribute set provided. Match fields from the raw data and extracted info to the target attributes. Return a JSON object with the mapped fields.
-
 ## EMAIL_LEAVE_LINES_TO_JSON_PROMPT
 You are extracting leave/resignation records from email body lines.
 

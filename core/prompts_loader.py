@@ -1,15 +1,25 @@
 import re
+import os
 from pathlib import Path
 
 PROMPT_KEYS = [
     "EXCEL_SCHEMA_INFER_PROMPT",
     "EMAIL_TO_JSON_PROMPT",
     "EML_BODY_TO_JSON_PROMPT",
-    "ATTRIBUTE_SET_PROMPT",
-    "FINAL_MAPPING_PROMPT"
 ]
 
 _prompts_cache = None
+
+
+def _resolve_prompt_file(project_root: Path) -> Path:
+    configured = os.getenv("PROMPT_FILE", "").strip()
+    if not configured:
+        return project_root / "prompt.md"
+    prompt_path = Path(configured).expanduser()
+    if not prompt_path.is_absolute():
+        prompt_path = (project_root / prompt_path).resolve()
+    return prompt_path
+
 
 def get_prompts() -> dict:
     global _prompts_cache
@@ -17,17 +27,15 @@ def get_prompts() -> dict:
         return _prompts_cache
     
     project_root = Path(__file__).parent.parent
-    prompt_file = project_root / "prompt.md"
+    prompt_file = _resolve_prompt_file(project_root)
     
     if not prompt_file.exists():
         raise FileNotFoundError(
             f"Prompt file not found: {prompt_file}\n"
-            f"Please create prompt.md in the project root directory with the following sections:\n"
+            f"Please create the prompt file (or set PROMPT_FILE) with the following sections:\n"
             f"- ## EXCEL_SCHEMA_INFER_PROMPT\n"
             f"- ## EMAIL_TO_JSON_PROMPT\n"
-            f"- ## EML_BODY_TO_JSON_PROMPT\n"
-            f"- ## ATTRIBUTE_SET_PROMPT\n"
-            f"- ## FINAL_MAPPING_PROMPT"
+            f"- ## EML_BODY_TO_JSON_PROMPT"
         )
     
     with open(prompt_file, "r", encoding="utf-8") as f:

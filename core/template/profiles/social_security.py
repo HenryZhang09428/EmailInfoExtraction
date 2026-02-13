@@ -314,6 +314,8 @@ def _date_candidates(intent: str) -> List[str]:
         ]
     if intent == "remove":
         return [
+            "end_date",
+            "enddate",
             "termination_date",
             "terminationdate",
             "leave_date",
@@ -359,6 +361,9 @@ def _select_date_key(records: List[Dict[str, Any]], intent: str) -> Tuple[Option
     if not candidates:
         return None, "intent_unknown"
     if intent == "remove":
+        end_date_key = _find_existing_key_by_normalized(records, "enddate")
+        if end_date_key:
+            return end_date_key, "forced_end_date"
         termination_key = _find_existing_key_by_normalized(records, "terminationdate")
         if termination_key:
             return termination_key, "forced_termination"
@@ -1673,7 +1678,6 @@ def build_social_security_fill_plan(
     debug_info["termination_reason_keys"] = reason_keys
     fill_plan_dict["debug"] = debug_info
     
-    from core.ir import FillPlan
     try:
         return FillPlan.from_dict(fill_plan_dict)
     except Exception as e:

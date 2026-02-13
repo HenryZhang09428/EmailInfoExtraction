@@ -1,5 +1,6 @@
 import argparse
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
@@ -50,6 +51,16 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Path to a profile YAML file.",
     )
+    parser.add_argument(
+        "--output-json-name",
+        default=None,
+        help="Output JSON filename (default: result.json, or env OUTPUT_JSON_NAME).",
+    )
+    parser.add_argument(
+        "--output-json-timestamp",
+        action="store_true",
+        help="Append timestamp to JSON output filename (overrides default name).",
+    )
     return parser.parse_args()
 
 
@@ -66,7 +77,11 @@ def main() -> int:
         require_llm=args.require_llm,
         profile_path=args.profile_path,
     )
-    json_path = write_json_output(result, args.output_dir)
+    output_json_name = args.output_json_name
+    if args.output_json_timestamp and not output_json_name:
+        output_json_name = f"result_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+    json_path = write_json_output(result, args.output_dir, output_filename=output_json_name)
 
     fills = result.get("fills", {})
     print("JSON:", json_path)

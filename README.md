@@ -36,12 +36,23 @@ OCR 输出用于补充字段与纠错（例如 Vision 表格行数不足时启�
 - Place the templates in `app/templates/` with these filenames:
   - `目标1模版：社保增员表.xlsx`
   - `目标2模版：社保减员表.xlsx`
-- If missing, the backend falls back to the original Desktop paths.
+- Or override by environment variables:
+  - `TEMPLATE_ADD_PATH`
+  - `TEMPLATE_REMOVE_PATH`
+  - `TEMPLATE_ADD_NAME`
+  - `TEMPLATE_REMOVE_NAME`
+- Prompts file can be overridden by `PROMPT_FILE` (default: `prompt.md` at project root).
 
 ### CLI
 Run from repo root:
 ```
 python -m app.cli --inputs /path/to/files /path/to/dir --output-dir .
+```
+
+Optional output JSON controls:
+```
+python -m app.cli --inputs /path/to/files --output-dir . --output-json-name custom.json
+python -m app.cli --inputs /path/to/files --output-dir . --output-json-timestamp
 ```
 
 ### API

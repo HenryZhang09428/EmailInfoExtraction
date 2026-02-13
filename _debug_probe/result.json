@@ -1,0 +1,1449 @@
+{
+  "meta": {
+    "processed_at": "2026-02-13T18:53:05",
+    "input_files": [
+      "/Users/zhanghengyu/Desktop/仕邦-Jan29/楚天龙/Fw_ 4月增减员-湖北楚天龙实业有限公司-仕邦（宁波）- 2.eml"
+    ],
+    "output_dir": "/Users/zhanghengyu/EmailsInfoExtraction/_debug_probe"
+  },
+  "summary": {
+    "total_sources": 2,
+    "by_type": {
+      "email": 1,
+      "excel": 1
+    },
+    "errors": []
+  },
+  "fills": {
+    "add": {
+      "template": "/Users/zhanghengyu/EmailsInfoExtraction/app/templates/目标1模版：社保增员表.xlsx",
+      "output_path": "/Users/zhanghengyu/EmailsInfoExtraction/_debug_probe/目标1模版：社保增员表_filled.xlsx",
+      "llm_used": false,
+      "cells_written": 293,
+      "warnings": [
+        "record_skipped_no_date:程蔚然",
+        "record_skipped_no_date:郑静",
+        "record_skipped_no_date:官敏玲",
+        "record_skipped_no_date:林城",
+        "record_skipped_no_date:张睿",
+        "record_skipped_no_date:唐雪丽",
+        "record_skipped_no_date:梁佩媚",
+        "record_skipped_no_date:冼霭呈",
+        "record_skipped_no_date:谢玉丹",
+        "record_skipped_no_date:覃黄燕",
+        "record_skipped_no_date:陈子玲",
+        "record_skipped_no_date:陆燕雄",
+        "record_skipped_no_date:叶清喜",
+        "record_skipped_no_date:梁翠洪",
+        "record_skipped_no_date:黄晓雅",
+        "record_skipped_no_date:占洁",
+        "record_skipped_no_date:窦宗福",
+        "record_skipped_no_date:李亚飞",
+        "record_skipped_no_date:钟圆",
+        "record_skipped_no_date:郑欣怡",
+        "record_skipped_no_date:庞桂梅",
+        "record_skipped_no_date:蒋嘉俊",
+        "record_skipped_no_date:叶秀梅",
+        "record_skipped_no_date:苏晓镅",
+        "record_skipped_no_date:游惠茹"
+      ]
+    },
+    "remove": {
+      "template": "/Users/zhanghengyu/EmailsInfoExtraction/app/templates/目标2模版：社保减员表.xlsx",
+      "output_path": "/Users/zhanghengyu/EmailsInfoExtraction/_debug_probe/目标2模版：社保减员表_filled.xlsx",
+      "llm_used": false,
+      "cells_written": 591,
+      "warnings": [
+        "Fallback fill plan used; LLM returned insufficient rows. Filling 74 rows."
+      ]
+    }
+  },
+  "sources": [
+    {
+      "source_id": "be25187b-4d88-4939-abec-c209b3c2fd51",
+      "filename": "Fw_ 4月增减员-湖北楚天龙实业有限公司-仕邦（宁波）- 2.eml",
+      "source_type": "email",
+      "parent_source_id": null,
+      "extracted": {
+        "data": [],
+        "metadata": {
+          "used_body": "text/plain",
+          "thread_truncated": true,
+          "thread_truncation_rule": "quoted_header_block",
+          "thread_marker": "header_block_3_fields",
+          "max_chars": 15000,
+          "truncated_to_max_chars": false,
+          "char_count": 342,
+          "thread_fields_found": [
+            "发送时间",
+            "发件人",
+            "收件人"
+          ]
+        },
+        "warnings": [],
+        "email_context": {
+          "headers": {
+            "from": "\"liushuhong@seebon.com\" <liushuhong@seebon.com>",
+            "to": "itweikaiyang <weikaiyang@hkust-gz.edu.cn>",
+            "cc": "",
+            "bcc": "",
+            "subject": "Fw: 4月增减员-湖北楚天龙实业有限公司-仕邦（宁波）",
+            "date": "Thu, 29 Jan 2026 09:24:57 +0800",
+            "message_id": "<202601290924572847258@seebon.com>"
+          },
+          "bodies_summary": {
+            "text_length": 592,
+            "html_length": 16088
+          },
+          "inline_images": [],
+          "attachments_summary": [
+            {
+              "filename": "人员参保登记2025年4月增员使用.xls",
+              "content_type": "application/octet-stream",
+              "size_bytes": 508416
+            }
+          ],
+          "warnings": []
+        },
+        "body_extracted": {
+          "data": [],
+          "metadata": {
+            "used_body": "text/plain",
+            "thread_truncated": true,
+            "thread_truncation_rule": "quoted_header_block",
+            "thread_marker": "header_block_3_fields",
+            "max_chars": 15000,
+            "truncated_to_max_chars": false,
+            "char_count": 342,
+            "thread_fields_found": [
+              "发送时间",
+              "发件人",
+              "收件人"
+            ]
+          },
+          "warnings": []
+        }
+      }
+    },
+    {
+      "source_id": "6ca168e3-404b-4010-8e5b-debb8a621ec2",
+      "filename": "人员参保登记2025年4月增员使用.xls",
+      "source_type": "excel",
+      "parent_source_id": "be25187b-4d88-4939-abec-c209b3c2fd51",
+      "extracted": {
+        "data": [
+          {
+            "id_number": "511303200202040960",
+            "name": "周娇",
+            "start_date": "2025-02-25",
+            "ethnicity": "汉族",
+            "phone": "18054702196",
+            "address": "四川省南充市高坪区螺溪街道枣子沟村1组218号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6228482099648128072",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511303200008152467",
+            "name": "高圆圆",
+            "start_date": "2025-02-24",
+            "ethnicity": "汉族",
+            "phone": "15881736795",
+            "address": "四川省南充市高坪区东观镇糍粑坳村4组56号",
+            "position_attribute": "",
+            "education_level": "大学本科",
+            "department": "",
+            "employee_id": "6216693100003580764",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "51130320060102196x",
+            "name": "林悦",
+            "start_date": "2025-02-21",
+            "ethnicity": "汉族",
+            "phone": "15328863264",
+            "address": "四川省南充市高坪区江陵镇牌坊村1组37号",
+            "position_attribute": "",
+            "education_level": "职业高中",
+            "department": "",
+            "employee_id": "6221806730001528953",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511303199407041363",
+            "name": "张兰",
+            "start_date": "2025-02-21",
+            "ethnicity": "汉族",
+            "phone": "18381709994",
+            "address": "四川省南充市高坪区中源大道一段2号5栋4单元5楼一号",
+            "position_attribute": "",
+            "education_level": "中等专科",
+            "department": "",
+            "employee_id": "5217003610006513908",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511621199306122681",
+            "name": "杨馥西",
+            "start_date": "2025-02-21",
+            "ethnicity": "汉族",
+            "phone": "18383972434",
+            "address": "四川省岳池县坪滩镇了解庵村2组50号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6212262315015368129",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511725200202210042",
+            "name": "邵沥",
+            "start_date": "2025-02-21",
+            "ethnicity": "汉族",
+            "phone": "18780135060",
+            "address": "四川省达州市渠县渠江镇渠光路61号附9号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6214832826189743",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "530627200306185515",
+            "name": "何贤津",
+            "start_date": "2025-02-17",
+            "ethnicity": "汉族",
+            "phone": "15198580655",
+            "address": "云南昭通镇雄县碗厂乡长岩村毛坡组",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6231900000138753690",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511304200111177220",
+            "name": "王程婷",
+            "start_date": "2025-02-20",
+            "ethnicity": "汉族",
+            "phone": "18781720136",
+            "address": "四川省南充市嘉陵区一立镇围塘坝村8组91号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6228232095749346764",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511324199002045704",
+            "name": "周春华",
+            "start_date": "2025-02-20",
+            "ethnicity": "汉族",
+            "phone": "18091580201",
+            "address": "四川省南充市仪陇县义门乡六村一组",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6216693600003287229",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511324199002242601",
+            "name": "冯榕",
+            "start_date": "2025-02-18",
+            "ethnicity": "汉族",
+            "phone": "18582110295",
+            "address": "南充市顺庆区小东街43号附2号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6212262315012562724",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511602199210190525",
+            "name": "欧莉婷",
+            "start_date": "2025-03-13",
+            "ethnicity": "汉族",
+            "phone": "18784163298",
+            "address": "四川省广安市广安区恒升镇保卫村9组14号四川省广安市广安区恒升镇保卫村9组14号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6215582316003680372",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "530381200204241127",
+            "name": "浦迪",
+            "start_date": "2025-03-12",
+            "ethnicity": "汉族",
+            "phone": "19298816462",
+            "address": "昆明市盘龙区",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6217997300053460294",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "441202199703250813",
+            "name": "杨振杰",
+            "start_date": "2025-03-10",
+            "ethnicity": "汉族",
+            "phone": "13672397122",
+            "address": "广东省肇庆市端州区城东街道名城星岸B区",
+            "position_attribute": "",
+            "education_level": "大学本科",
+            "department": "",
+            "employee_id": "6216607000037893032",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "441202199704292329",
+            "name": "陈瑞雯",
+            "start_date": "2025-03-06",
+            "ethnicity": "汉族",
+            "phone": "13286531628",
+            "address": "广东省肇庆市端州区城西街道三联巷159号",
+            "position_attribute": "",
+            "education_level": "大学本科",
+            "department": "",
+            "employee_id": "6222032017000332387",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "441202199203091545",
+            "name": "王嘉蕙",
+            "start_date": "2025-03-06",
+            "ethnicity": "汉族",
+            "phone": "13211066910",
+            "address": "广东省肇庆市端州区西江南路2号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6222022017006702064",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "445381198408046027",
+            "name": "陈小娟",
+            "start_date": "2025-03-06",
+            "ethnicity": "汉族",
+            "phone": "13727251731",
+            "address": "广东省肇庆市端州区端州六路芙蓉西二街",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6216697000000498026",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "130984200207245120",
+            "name": "夏晴",
+            "start_date": "2025-03-06",
+            "ethnicity": "汉族",
+            "phone": "15252149875",
+            "address": "海州区旺旺家园",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6214835184328597",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "445381198708206045",
+            "name": "陈琪英",
+            "start_date": "2025-03-05",
+            "ethnicity": "汉族",
+            "phone": "13822611312",
+            "address": "广东省罗定市生江镇碗窑村",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6222022017003817659",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "441202197901302021",
+            "name": "梁碧玉",
+            "start_date": "2025-03-04",
+            "ethnicity": "汉族",
+            "phone": "15875805504",
+            "address": "广东省肇庆市福星路7号之一",
+            "position_attribute": "",
+            "education_level": "职业高中",
+            "department": "",
+            "employee_id": "6228481151580280717",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "632126200008081226",
+            "name": "许可欣",
+            "start_date": "2025-03-03",
+            "ethnicity": "汉族",
+            "phone": "19997213923",
+            "address": "青海省海东市互助县哈拉直沟乡",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6216728700001635939",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "630103199604272027",
+            "name": "吴瑶",
+            "start_date": "2025-03-04",
+            "ethnicity": "汉族",
+            "phone": "13109786405",
+            "address": "青海省西宁市城北区朝阳东路57号",
+            "position_attribute": "",
+            "education_level": "中等专科",
+            "department": "",
+            "employee_id": "6214832680938342",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "320706200011052023",
+            "name": "张子怡",
+            "start_date": "2025-03-03",
+            "ethnicity": "汉族",
+            "phone": "19951399916",
+            "address": "连云港市海州区网疃",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6214832411300505",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "320706199406170029",
+            "name": "徐塬",
+            "start_date": "2025-03-03",
+            "ethnicity": "汉族",
+            "phone": "18861335335",
+            "address": "江苏省连云港市海州区白虎山村白虎山队87号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6222021107008637771",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "44120219970330202x",
+            "name": "阮丹虹",
+            "start_date": "2025-03-10",
+            "ethnicity": "汉族",
+            "phone": "13286502864",
+            "address": "广东省肇庆市端州区芙蓉西一街嘉仕翠园",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6212252017004204594",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "441283199909023163",
+            "name": "欧丽珊",
+            "start_date": "2025-03-05",
+            "ethnicity": "汉族",
+            "phone": "13542904760",
+            "address": "广东省肇庆市高要区活道镇云美村委会云美村32号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6217257000001669864",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "511324199201066225",
+            "name": "邱敏",
+            "start_date": "2025-03-05",
+            "ethnicity": "汉族",
+            "phone": "18780719496",
+            "address": "四川省仪陇县新政镇狮子村六组56号",
+            "position_attribute": "",
+            "education_level": "职业高中",
+            "department": "",
+            "employee_id": "6228482099648128072",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "440811200007290313",
+            "name": "陈超军",
+            "start_date": "2023-06-25",
+            "ethnicity": "汉族",
+            "phone": "14778616058",
+            "address": "广东省湛江市麻章区",
+            "position_attribute": "",
+            "education_level": "大学本科",
+            "department": "",
+            "employee_id": "6217003130010951628",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "500231199005312439",
+            "name": "陈建波",
+            "start_date": "2025-03-20",
+            "ethnicity": "汉族",
+            "phone": "13330288820",
+            "address": "重庆市垫江县普顺镇东风7组1号",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6226096556550435",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "431022199906024915",
+            "name": "余春根",
+            "start_date": "2025-03-20",
+            "ethnicity": "汉族",
+            "phone": "15873781017",
+            "address": "湖南省宜章县关溪乡雄关村第12村民小组",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6214832036146632",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "220103198808051612",
+            "name": "赵旗浩",
+            "start_date": "2025-03-25",
+            "ethnicity": "汉族",
+            "phone": "18686514930",
+            "address": "长春市宽城区兴业街道立山委202组",
+            "position_attribute": "",
+            "education_level": "大学专科",
+            "department": "",
+            "employee_id": "6214839753321223",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "人员参保登记报盘模板"
+          },
+          {
+            "id_number": "110101********0067",
+            "name": "测试",
+            "residence_status": "深圳户籍",
+            "start_date": "20100101",
+            "ethnicity": "汉族",
+            "phone": "132****1234",
+            "address": "广东省深圳市",
+            "computer_id": "1234567",
+            "job_category": "管理(技术)岗位",
+            "personal_identity": "干部",
+            "employment_type": "合同工",
+            "education_level": "博士研究生",
+            "job_title": "员级职称",
+            "professional_qualification": "高级（三级）",
+            "medical_payment_level": "一档医疗在职",
+            "payment_salary": "5000",
+            "department_name": "测试部门",
+            "residence_type": "农业",
+            "residence_code": "441802.清城区",
+            "employment_form": "雇佣就业",
+            "pre_employment_identity": "未升学初中毕业生",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "示例"
+          },
+          {
+            "name": "程蔚然",
+            "id_number": "342502200010090027",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "宁国市人力资源和社会保障局流动人员人事档案整理及数字化项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "郑静",
+            "id_number": "342502200009112823",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "宁国市人力资源和社会保障局流动人员人事档案整理及数字化项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "官敏玲",
+            "id_number": "440222200205292623",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年高校毕业生档案电子（数字）化服务与流动人员人事档案辅助性工作项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "林城",
+            "id_number": "445121200303084812",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "潮州市潮安区社保档案影像化项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "张睿",
+            "id_number": "431222199908095072",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年高校毕业生档案电子（数字）化服务与流动人员人事档案辅助性工作项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "唐雪丽",
+            "id_number": "44182319960814454x",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年高校毕业生档案电子（数字）化服务与流动人员人事档案辅助性工作项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "梁佩媚",
+            "id_number": "440603199005063444",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年高校毕业生档案电子（数字）化服务与流动人员人事档案辅助性工作项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "冼霭呈",
+            "id_number": "440802200104152223",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年湛江市社保经办机构社保业务历史档案影像化项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "谢玉丹",
+            "id_number": "440825199910163727",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "2024年湛江市社保经办机构社保业务历史档案影像化项目",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "覃黄燕",
+            "id_number": "452226198710258943",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "来宾数据采集",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "陈子玲",
+            "id_number": "341122199808285023",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "陆燕雄",
+            "id_number": "441283200004223182",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "叶清喜",
+            "id_number": "445322199908254329",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "梁翠洪",
+            "id_number": "441283198405254828",
+            "amount": "2360",
+            "end_date": "2025-04-01",
+            "amount__5": "",
+            "end_date__6": "",
+            "start_date": "",
+            "project_name": "",
+            "id_card": "True",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "社保减员"
+          },
+          {
+            "name": "多吉措",
+            "id_number": "632128200109283022",
+            "phone": "15897211262",
+            "start_date": "2025-02-22",
+            "bank_name": "招商银行",
+            "bank_account": "6214859722247275",
+            "bank_account_name": "多吉措",
+            "bank_city": "西宁五四大街支行",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "青海省医疗保障局医疗保障信息平台建设项目（2023年）",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "井启萍",
+            "id_number": "632822199609280025",
+            "phone": "13327697375",
+            "start_date": "2025-02-18",
+            "bank_name": "招商银行",
+            "bank_account": "6214839720889047",
+            "bank_account_name": "井启萍",
+            "bank_city": "西宁",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "青海省西宁市城东区医保局档案数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "赵希玲",
+            "id_number": "632421200204270029",
+            "phone": "18197199392",
+            "start_date": "2025-02-19",
+            "bank_name": "农业银行",
+            "bank_account": "6228231944852280974",
+            "bank_account_name": "赵希玲",
+            "bank_city": "西宁",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "青海省西宁市城东区医保局档案数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "钟怡阳",
+            "id_number": "632122200101230040",
+            "phone": "18397126105",
+            "start_date": "2025-02-19",
+            "bank_name": "招商银行",
+            "bank_account": "6214830522443323",
+            "bank_account_name": "钟怡阳",
+            "bank_city": "上海",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "青海省西宁市城东区医保局档案数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "刘佳怡",
+            "id_number": "420923200402250423",
+            "phone": "13581475007",
+            "start_date": "2025-03-31",
+            "bank_name": "中国建设银行",
+            "bank_account": "6215340302817225474",
+            "bank_account_name": "刘佳怡",
+            "bank_city": "孝感市云梦县",
+            "insurance_purchase_month": "",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "卢佳庆",
+            "id_number": "511325200110305413",
+            "phone": "15926322273",
+            "start_date": "2025-03-26",
+            "bank_name": "建设银行",
+            "bank_account": "6217002660015351623",
+            "bank_account_name": "卢佳庆",
+            "bank_city": "武汉市",
+            "insurance_purchase_month": "",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "蔡子龙",
+            "id_number": "420923200010100178",
+            "phone": "13058549443",
+            "start_date": "2025-03-19",
+            "bank_name": "中国农业银行",
+            "bank_account": "6230521610013792877",
+            "bank_account_name": "蔡子龙",
+            "bank_city": "孝感市云梦县",
+            "insurance_purchase_month": "",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "公却卓玛",
+            "id_number": "632128199809134022",
+            "phone": "18195636431",
+            "start_date": "2025-03-18",
+            "bank_name": "招商银行",
+            "bank_account": "6214 8597 2224 7218",
+            "bank_account_name": "公却卓玛",
+            "bank_city": "西宁市",
+            "insurance_purchase_month": "",
+            "project": "青海省医疗保障局医疗保障信息平台建设项目（2023年）",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "公巴吉",
+            "id_number": "632128199811204026",
+            "phone": "13897670637",
+            "start_date": "2025-03-18",
+            "bank_name": "招商银行",
+            "bank_account": "6214832681005539",
+            "bank_account_name": "公巴吉",
+            "bank_city": "西宁市",
+            "insurance_purchase_month": "",
+            "project": "青海省医疗保障局医疗保障信息平台建设项目（2023年）",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "吴玉玮",
+            "id_number": "320722199610244523",
+            "phone": "13179585978",
+            "start_date": "2025-03-18",
+            "bank_name": "工商银行",
+            "bank_account": "6222021107007197868",
+            "bank_account_name": "吴玉玮",
+            "bank_city": "连云港市",
+            "insurance_purchase_month": "",
+            "project": "连云港市连云区机关事业单位养老保险业务档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "张力之",
+            "id_number": "421126200406251710",
+            "phone": "17886878223",
+            "start_date": "2025-03-18",
+            "bank_name": "工商银行",
+            "bank_account": "6215581814011978557",
+            "bank_account_name": "张力之",
+            "bank_city": "黄冈市",
+            "insurance_purchase_month": "",
+            "project": "黄冈市人社局档案中心档案数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "栾莹",
+            "id_number": "420923199507180622",
+            "phone": "18271697042",
+            "start_date": "2025-03-17",
+            "bank_name": "农业银行句容市东方支行",
+            "bank_account": "6213361049900826671",
+            "bank_account_name": "栾莹",
+            "bank_city": "句容",
+            "insurance_purchase_month": "",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "覃翠芬",
+            "id_number": "44530220030811332x",
+            "phone": "15766227151",
+            "start_date": "2025-03-07",
+            "bank_name": "工商银行",
+            "bank_account": "6212252017003521808",
+            "bank_account_name": "覃翠芬",
+            "bank_city": "肇庆市",
+            "insurance_purchase_month": "",
+            "project": "2024年度肇庆市社保业务历史档案影像化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "田英",
+            "id_number": "421181198503279162",
+            "phone": "15889370562",
+            "start_date": "2025-03-05",
+            "bank_name": "工商银行",
+            "bank_account": "62257675591050323",
+            "bank_account_name": "田英",
+            "bank_city": "黄冈",
+            "insurance_purchase_month": "",
+            "project": "黄冈市人社局档案中心档案数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "汪月",
+            "id_number": "341122200010280229",
+            "phone": "17856088159",
+            "start_date": "2025-02-28",
+            "bank_name": "中国银行",
+            "bank_account": "6213326300001873292",
+            "bank_account_name": "汪月",
+            "bank_city": "来安县",
+            "insurance_purchase_month": "",
+            "project": "2024年来安县人力资源和社会保障局档案服务项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "王满",
+            "id_number": "420923199010113088",
+            "phone": "15172126464",
+            "start_date": "2025-02-25",
+            "bank_name": "中国建设银行",
+            "bank_account": "420923199010113088",
+            "bank_account_name": "王满",
+            "bank_city": "云梦县建设路建设银行",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "李理",
+            "id_number": "420923198503105006",
+            "phone": "15971298791",
+            "start_date": "2025-02-25",
+            "bank_name": "中国银行",
+            "bank_account": "6217567600052683253",
+            "bank_account_name": "李理",
+            "bank_city": "孝感",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "云梦县公共就业和人才服务中心-高校毕业生档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "name": "陈华茜",
+            "id_number": "320722199306048122",
+            "phone": "15722477732",
+            "start_date": "2025-03-03",
+            "bank_name": "中国邮政储蓄银行",
+            "bank_account": "6217002000009798192",
+            "bank_account_name": "陈华茜",
+            "bank_city": "昆山经济技术开发区支行",
+            "insurance_purchase_month": "2025-04-01",
+            "project": "连云港市连云区机关事业单位养老保险业务档案整理及数字化项目",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保增员"
+          },
+          {
+            "id": "1",
+            "name": "黄晓雅",
+            "id_number": "441502199412013064",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "2",
+            "name": "占洁",
+            "id_number": "421102199603301629",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "3",
+            "name": "窦宗福",
+            "id_number": "630122200206217959",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "4",
+            "name": "李亚飞",
+            "id_number": "410581200301090184",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "5",
+            "name": "钟圆",
+            "id_number": "441202200205226525",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "6",
+            "name": "郑欣怡",
+            "id_number": "441202199810011025",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "7",
+            "name": "庞桂梅",
+            "id_number": "441283198210153963",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "",
+            "name": "蒋嘉俊",
+            "id_number": "445302200106041516",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "",
+            "name": "叶秀梅",
+            "id_number": "441283198905123568",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "",
+            "name": "苏晓镅",
+            "id_number": "441283199601093966",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          },
+          {
+            "id": "",
+            "name": "游惠茹",
+            "id_number": "44120219870722102X",
+            "end_date": "2025-04-01",
+            "start_date": "",
+            "remark": "",
+            "__source_file__": "人员参保登记2025年4月增员使用.xls",
+            "__sheet_name__": "商保减员"
+          }
+        ],
+        "metadata": {
+          "sheets": [
+            {
+              "sheet_name": "人员参保登记报盘模板",
+              "header_row_idx": 1,
+              "data_rows": 31,
+              "coverage": 0.6562,
+              "warnings": [
+                "second_header_row_rejected_as_data",
+                "schema_infer_low_coverage"
+              ]
+            },
+            {
+              "sheet_name": "说明",
+              "header_row_idx": 0,
+              "data_rows": 9,
+              "coverage": 1.0,
+              "warnings": [
+                "schema_infer_low_coverage"
+              ]
+            },
+            {
+              "sheet_name": "示例",
+              "header_row_idx": 1,
+              "data_rows": 1,
+              "coverage": 1.0,
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ]
+            },
+            {
+              "sheet_name": "行政区划字典",
+              "header_row_idx": -1,
+              "data_rows": 3698,
+              "coverage": 1.0,
+              "warnings": [
+                "no_header_row_detected",
+                "数据行 3698 行，仅处理前 1000 行"
+              ]
+            },
+            {
+              "sheet_name": "社保减员",
+              "header_row_idx": 1,
+              "data_rows": 35,
+              "coverage": 0.9,
+              "warnings": [
+                "second_header_row_rejected_as_data",
+                "列语义存在重复键，已自动去重"
+              ]
+            },
+            {
+              "sheet_name": "商保增员",
+              "header_row_idx": 1,
+              "data_rows": 19,
+              "coverage": 0.7143,
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ]
+            },
+            {
+              "sheet_name": "商保减员",
+              "header_row_idx": 0,
+              "data_rows": 19,
+              "coverage": 0.6667,
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ]
+            }
+          ],
+          "processed_rows": 74,
+          "records_count_by_sheet": {
+            "人员参保登记报盘模板": 30,
+            "说明": 0,
+            "示例": 1,
+            "行政区划字典": 0,
+            "社保减员": 14,
+            "商保增员": 18,
+            "商保减员": 11
+          },
+          "per_sheet": {
+            "人员参保登记报盘模板": {
+              "header_row_idx": 1,
+              "data_start_idx": 2,
+              "data_rows": 31,
+              "coverage": 0.6562,
+              "semantic_key_by_header": {
+                "证件号码": "id_number",
+                "姓名": "name",
+                "入职时间": "start_date",
+                "户籍": "",
+                "入深户时间": "",
+                "民族": "ethnicity",
+                "手机号码": "phone",
+                "通讯地址": "address",
+                "电脑号": "",
+                "岗位类别": "position_attribute",
+                "个人身份": "",
+                "用工形式": "",
+                "学历": "education_level",
+                "职称": "",
+                "国家职业资格或职业技能等级": "",
+                "医疗缴费档次": "",
+                "缴费工资": "",
+                "起缴月份": "",
+                "部门名称": "department",
+                "户籍地类别": "",
+                "户口所在地行政区划代码": "",
+                "就业形式": "",
+                "就业前身份": "",
+                "银行名称": "",
+                "银行账号": "employee_id",
+                "银行账户名": "",
+                "开户市": "",
+                "公积金": "",
+                "col29": "",
+                "col30": "",
+                "col31": "",
+                "col32": ""
+              },
+              "warnings": [
+                "second_header_row_rejected_as_data",
+                "schema_infer_low_coverage"
+              ],
+              "records_count": 30,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": null
+            },
+            "说明": {
+              "header_row_idx": 0,
+              "data_start_idx": 2,
+              "data_rows": 9,
+              "coverage": 1.0,
+              "semantic_key_by_header": {
+                "单位编号为必填项红色列为必填项": "company"
+              },
+              "warnings": [
+                "schema_infer_low_coverage"
+              ],
+              "records_count": 0,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": "filtered_all_rows"
+            },
+            "示例": {
+              "header_row_idx": 1,
+              "data_start_idx": 2,
+              "data_rows": 1,
+              "coverage": 1.0,
+              "semantic_key_by_header": {
+                "证件号码": "id_number",
+                "姓名": "name",
+                "户籍": "residence_status",
+                "入深户时间": "start_date",
+                "民族": "ethnicity",
+                "手机号码": "phone",
+                "通讯地址": "address",
+                "电脑号": "computer_id",
+                "岗位类别": "job_category",
+                "个人身份": "personal_identity",
+                "用工形式": "employment_type",
+                "学历": "education_level",
+                "职称": "job_title",
+                "国家职业资格或职业技能等级": "professional_qualification",
+                "医疗缴费档次": "medical_payment_level",
+                "缴费工资": "payment_salary",
+                "部门名称": "department_name",
+                "户籍地类别": "residence_type",
+                "户口所在地行政区划代码": "residence_code",
+                "就业形式": "employment_form",
+                "就业前身份": "pre_employment_identity"
+              },
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ],
+              "records_count": 1,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": null
+            },
+            "行政区划字典": {
+              "header_row_idx": -1,
+              "data_start_idx": 0,
+              "data_rows": 3698,
+              "coverage": 1.0,
+              "semantic_key_by_header": {
+                "col0": "address"
+              },
+              "warnings": [
+                "no_header_row_detected",
+                "数据行 3698 行，仅处理前 1000 行"
+              ],
+              "records_count": 0,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": "no_header_detected"
+            },
+            "社保减员": {
+              "header_row_idx": 1,
+              "data_start_idx": 2,
+              "data_rows": 35,
+              "coverage": 0.9,
+              "semantic_key_by_header": {
+                "姓名": "name",
+                "证件号码": "id_number",
+                "基数": "amount",
+                "停保月份": "end_date",
+                "入职日期": "start_date",
+                "离职日期": "",
+                "项目名称": "project_name",
+                "身份证": "id_card"
+              },
+              "warnings": [
+                "second_header_row_rejected_as_data",
+                "列语义存在重复键，已自动去重"
+              ],
+              "records_count": 14,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": null
+            },
+            "商保增员": {
+              "header_row_idx": 1,
+              "data_start_idx": 2,
+              "data_rows": 19,
+              "coverage": 0.7143,
+              "semantic_key_by_header": {
+                "姓名": "name",
+                "证件号码": "id_number",
+                "手机号码": "phone",
+                "岗位": "",
+                "入职日期": "start_date",
+                "离职日期": "",
+                "银行名称": "bank_name",
+                "银行账号": "bank_account",
+                "银行账户名": "bank_account_name",
+                "开户市": "bank_city",
+                "商保购买月": "insurance_purchase_month",
+                "出勤天数": "",
+                "所属项目": "project",
+                "身份证": ""
+              },
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ],
+              "records_count": 18,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": null
+            },
+            "商保减员": {
+              "header_row_idx": 0,
+              "data_start_idx": 1,
+              "data_rows": 19,
+              "coverage": 0.6667,
+              "semantic_key_by_header": {
+                "序号": "id",
+                "姓名": "name",
+                "证件号码": "id_number",
+                "减员月份": "end_date",
+                "入职日期": "start_date",
+                "离职日期": "",
+                "备注": "remark",
+                "项目名称": "",
+                "身份证": ""
+              },
+              "warnings": [
+                "second_header_row_rejected_as_data"
+              ],
+              "records_count": 11,
+              "read_backend": "pandas_xlrd",
+              "no_records_reason": null
+            }
+          },
+          "truncated_workbook_level": false,
+          "workbook_records_seen": 74,
+          "selected_sheet_name": "说明",
+          "sheet_selection_debug": {
+            "sheets": [
+              {
+                "sheet_name": "人员参保登记报盘模板",
+                "best_header_like_score": 3.675,
+                "non_empty_cells_count": 638
+              },
+              {
+                "sheet_name": "说明",
+                "best_header_like_score": 3.7,
+                "non_empty_cells_count": 11
+              },
+              {
+                "sheet_name": "示例",
+                "best_header_like_score": 3.7,
+                "non_empty_cells_count": 44
+              },
+              {
+                "sheet_name": "行政区划字典",
+                "best_header_like_score": null,
+                "non_empty_cells_count": 30
+              },
+              {
+                "sheet_name": "社保减员",
+                "best_header_like_score": 3.7,
+                "non_empty_cells_count": 107
+              },
+              {
+                "sheet_name": "商保增员",
+                "best_header_like_score": 3.7,
+                "non_empty_cells_count": 205
+              },
+              {
+                "sheet_name": "商保减员",
+                "best_header_like_score": 3.7,
+                "non_empty_cells_count": 70
+              }
+            ],
+            "chosen_reason": "best_header_like_score",
+            "selected_sheet_name": "说明"
+          },
+          "workbook_records_limit": 5000
+        },
+        "warnings": [
+          "schema_infer_low_coverage",
+          "second_header_row_rejected_as_data",
+          "no_header_row_detected",
+          "数据行 3698 行，仅处理前 1000 行",
+          "列语义存在重复键，已自动去重"
+        ]
+      }
+    }
+  ]
+}
