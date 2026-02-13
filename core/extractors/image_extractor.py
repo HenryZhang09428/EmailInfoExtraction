@@ -3,7 +3,7 @@ Image extractor module for extracting content from image files.
 """
 import uuid
 from pathlib import Path
-from typing import List, Any, Tuple, Optional
+from typing import List, Any, Optional
 
 from core.extractors.base import BaseExtractor
 from core.ir import SourceDoc, SourceBlock, BlockType
@@ -217,22 +217,3 @@ IMPORTANT: If there is a table, extract ALL rows completely. Use the header row 
             blocks=blocks,
             extracted=extracted_json
         )
-
-
-# Backward compatibility function
-def extract_image(path: str, llm: LLMClient) -> Tuple[List[SourceBlock], Any]:
-    """
-    Legacy function for backward compatibility.
-    
-    Extracts image content and returns blocks and extracted JSON.
-    
-    Args:
-        path: Path to the image file.
-        llm: LLM client for extraction.
-    
-    Returns:
-        Tuple of (blocks, extracted_json).
-    """
-    extractor = ImageExtractor(llm)
-    source_doc = extractor.extract(path)
-    return source_doc.blocks, source_doc.extracted

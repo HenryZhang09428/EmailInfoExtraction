@@ -1454,24 +1454,3 @@ class EmailExtractor(BaseExtractor):
             blocks=blocks,
             extracted=extracted_json
         )
-
-
-# Backward compatibility function
-def extract_email(path: str, llm: LLMClient, prompts: dict, source_id: Optional[str] = None) -> Tuple[List[SourceBlock], Any, List[str]]:
-    """
-    Legacy function for backward compatibility.
-    
-    Extracts email content and returns blocks, extracted JSON, and derived files.
-    
-    Args:
-        path: Path to the email file.
-        llm: LLM client for extraction.
-        prompts: Dictionary of prompts.
-        source_id: Optional source ID.
-    
-    Returns:
-        Tuple of (blocks, extracted_json, derived_files).
-    """
-    extractor = EmailExtractor(llm, prompts, source_id)
-    source_doc = extractor.extract(path)
-    return source_doc.blocks, source_doc.extracted, extractor.get_derived_files()

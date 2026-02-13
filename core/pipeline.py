@@ -206,7 +206,6 @@ def run_extract(file_paths: List[str], excel_sheet: Optional[str] = None) -> Int
     4. Using the singleton LLM client for dependency injection
     """
     # Dependency injection: get singleton instances
-    settings = get_settings()
     llm = get_llm_client()  # Singleton LLM instance
     prompts = get_prompts()
     
@@ -379,9 +378,6 @@ def run_extract(file_paths: List[str], excel_sheet: Optional[str] = None) -> Int
     
     logger.info("IR created with %d sources", len(ir.sources))
     return ir
-
-def run_pipeline(file_paths: List[str], excel_sheet: Optional[str] = None) -> IntermediateRepresentation:
-    return run_extract(file_paths, excel_sheet=excel_sheet)
 
 def fill_template(
     ir: IntermediateRepresentation,
@@ -661,42 +657,3 @@ def build_stable_ir_signature(ir: Any) -> str:
         })
     json_text = json.dumps(payload, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(json_text.encode("utf-8")).hexdigest()
-
-
-if __name__ == "__main__":
-    ir_a = {
-        "sources": [
-            {
-                "filename": "a.xlsx",
-                "source_type": "excel",
-                "parent_source_id": None,
-                "extracted": {"data": [{"b": 2, "a": 1}, {"c": [3, 2, 1]}]},
-            },
-            {
-                "filename": "b.xlsx",
-                "source_type": "excel",
-                "parent_source_id": None,
-                "extracted": [{"x": 1, "y": 2}],
-            },
-        ]
-    }
-    ir_b = {
-        "sources": [
-            {
-                "filename": "b.xlsx",
-                "source_type": "excel",
-                "parent_source_id": None,
-                "extracted": [{"y": 2, "x": 1}],
-            },
-            {
-                "filename": "a.xlsx",
-                "source_type": "excel",
-                "parent_source_id": None,
-                "extracted": {"data": [{"a": 1, "b": 2}, {"c": [1, 3, 2]}]},
-            },
-        ]
-    }
-    sig_a = build_stable_ir_signature(ir_a)
-    sig_b = build_stable_ir_signature(ir_b)
-    assert sig_a == sig_b, "Stable signature mismatch for equivalent IRs"
-    print("build_stable_ir_signature smoke test passed.")

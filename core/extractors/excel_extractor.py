@@ -2031,35 +2031,3 @@ class ExcelExtractor(BaseExtractor):
             blocks=blocks,
             extracted=extracted_json
         )
-
-# Backward compatibility function
-def extract_excel(path: str, llm: LLMClient, prompts: dict) -> Tuple[List[SourceBlock], Any]:
-    """
-    Legacy function for backward compatibility.
-    
-    Extracts Excel file content and returns blocks and extracted JSON.
-    
-    Args:
-        path: Path to the Excel file.
-        llm: LLM client for extraction.
-        prompts: Dictionary of prompts.
-    
-    Returns:
-        Tuple of (blocks, extracted_json).
-    """
-    extractor = ExcelExtractor(llm, prompts)
-    try:
-        source_doc = extractor.extract(path)
-        return source_doc.blocks, source_doc.extracted
-    except Exception as e:
-        error_msg = f"Failed to read Excel file: {e}"
-        logger.error(error_msg)
-        extracted_json = {
-            "error": error_msg,
-            "warnings": [f"无法读取Excel文件: {str(e)}"]
-        }
-        blocks = [
-            SourceBlock(order=1, type=BlockType.ERROR, content=error_msg, meta={}),
-            SourceBlock(order=2, type=BlockType.EXTRACTED_JSON, content=extracted_json, meta={})
-        ]
-        return blocks, extracted_json
