@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from core.logger import get_logger
 from core.pipeline import fill_template, run_extract
-from core.runtime.profile_loader import load_profile
+from core.profile_loader import load_profile
 
 logger = get_logger(__name__)
 
