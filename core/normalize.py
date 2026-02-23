@@ -1,8 +1,11 @@
 """
-Normalize layer: convert raw extraction results into structured IR outputs.
+规范化层 (Normalize Layer)
+========================
 
-FactsBuilder  – SourceDoc.extracted → List[Fact]  (per-source_type strategy)
-PayloadBuilder – IR.sources → {sources, merged}    (planner input)
+将原始提取结果转换为结构化的 IR 输出。
+
+FactsBuilder  – 将 SourceDoc.extracted 转为 List[Fact]（按 source_type 采用不同策略）
+PayloadBuilder – 将 IR.sources 转为 {sources, merged}（供填充规划器使用）
 """
 
 from __future__ import annotations
@@ -22,14 +25,17 @@ logger = get_logger(__name__)
 
 class FactsBuilder:
     """
-    Convert ``SourceDoc.extracted`` into a flat ``List[Fact]``.
+    事实构建器：将 SourceDoc.extracted 转为扁平的 List[Fact]。
 
-    Each *source_type* has its own strategy so the caller does not need
-    giant ``if/elif`` trees.
+    不同 source_type 采用不同策略，调用方无需大量 if/elif 分支。
     """
 
     @classmethod
     def build(cls, sources: List[SourceDoc]) -> List[Fact]:
+        """
+        从 SourceDoc 列表构建 Fact 列表。
+        图片类型使用 _build_image_facts，其他类型使用 _build_generic_facts。
+        """
         facts: List[Fact] = []
         for doc in sources:
             if not doc.extracted or not isinstance(doc.extracted, dict):
@@ -49,6 +55,7 @@ class FactsBuilder:
         src_ref: List[dict],
         out: List[Fact],
     ) -> None:
+        """将通用提取结果（键值对）转为 Fact 列表。"""
         for key, value in extracted.items():
             out.append(Fact(name=key, value=value, sources=src_ref))
 
@@ -58,7 +65,11 @@ class FactsBuilder:
         src_ref: List[dict],
         out: List[Fact],
     ) -> None:
-        # extracted_fields → one fact per field
+        """
+        将图片提取结果转为 Fact 列表。
+        处理 extracted_fields（每字段一 fact）、tables（每单元格一 fact）、
+        numbers（每数字一 fact）及其他顶层键。
+        """
         fields = extracted.get("extracted_fields", {})
         if isinstance(fields, dict):
             for name, value in fields.items():
@@ -105,11 +116,10 @@ class FactsBuilder:
 
 class PayloadBuilder:
     """
-    Build the ``{sources, merged}`` payload consumed by the fill planner.
+    载荷构建器：构建填充规划器所需的 {sources, merged} 载荷。
 
-    *merged* contains only scalar context values (company name, date, etc.)
-    that are useful for constant inference.  Container keys (data, records, …)
-    are excluded via a configurable skip-set.
+    merged 仅包含标量上下文值（公司名、日期等），用于常量推断。
+    容器类键（data、records 等）通过可配置的 skip-set 排除。
     """
 
     # Keys whose values are record containers or large structures that must
@@ -129,7 +139,10 @@ class PayloadBuilder:
         self._skip_keys = skip_keys if skip_keys is not None else self.DEFAULT_SKIP_KEYS
 
     def build(self, sources: List[SourceDoc]) -> dict:
-        """Return ``{"sources": [...], "merged": {...}}``."""
+        """
+        构建载荷，返回 {"sources": [...], "merged": {...}}。
+        按 parent_source_id、source_type、filename 排序 sources。
+        """
         sorted_sources = sorted(
             (s for s in sources if s.extracted is not None),
             key=lambda s: (s.parent_source_id or "", s.source_type or "", s.filename or ""),
@@ -155,7 +168,7 @@ class PayloadBuilder:
     # -- internals -----------------------------------------------------------
 
     def _merge_scalars(self, extracted: dict, merged: Dict[str, Any]) -> None:
-        """Collect first-seen scalar values into *merged*, skipping containers."""
+        """将首次出现的标量值收集到 merged，跳过容器类键。"""
         for key, value in extracted.items():
             if not isinstance(key, str) or key in self._skip_keys:
                 continue
@@ -166,11 +179,12 @@ class PayloadBuilder:
 
     @staticmethod
     def _is_scalar(value: Any) -> bool:
+        """判断值是否为标量（None、str、int、float、bool）。"""
         return value is None or isinstance(value, (str, int, float, bool))
 
     @staticmethod
     def _inject_source_metadata(data: Any, source: SourceDoc) -> Any:
-        """Tag every record-dict with ``__source_file__`` etc."""
+        """为每条记录字典注入 __source_file__、__source_type__ 等元数据。"""
         if data is None:
             return data
         if isinstance(data, list):

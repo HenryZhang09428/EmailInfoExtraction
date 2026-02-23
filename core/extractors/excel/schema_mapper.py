@@ -82,6 +82,8 @@ class SchemaMapper:
         tc = DataCleaner.normalize_header_compact(header)
 
         # Order matters: more-specific rules first.
+        if any(k in tc for k in ["银行账号", "银行卡号", "收款账号", "accountno", "accountnumber"]):
+            return "bank_account"
         if "供应商发薪编码名称" in tc:
             return "vendor_pay_code_name"
         if "供应商发薪编码" in tc:
@@ -177,6 +179,8 @@ class SchemaMapper:
         text = DataCleaner.normalize_header_compact(header)
         if not text:
             return ""
+        if any(t in text for t in ["银行账号", "银行卡号", "收款账号", "accountno", "accountnumber"]):
+            return "bank_account"
         # Specific disambiguation first
         if any(t in text for t in ["岗位属性", "岗位类别", "岗位序列", "一线", "二线", "三线", "职级", "层级"]) or (
             "属性" in text and any(t in text for t in ["岗位", "职位", "职务", "position", "title"])
@@ -389,6 +393,7 @@ class SchemaMapper:
     def apply_forced_mappings(
         header_paths: List[str],
         mapping: Dict[str, str],
+        extra_force_map: Optional[Dict[str, str]] = None,
     ) -> Tuple[List[str], Dict[str, str]]:
         """
         Normalise header paths and apply social-security forced mappings.
@@ -408,6 +413,10 @@ class SchemaMapper:
             "减员年月": "termination_date", "离职年月": "termination_date",
             "备注": "remark",
         }
+        if isinstance(extra_force_map, dict):
+            for k, v in extra_force_map.items():
+                if isinstance(k, str) and k.strip() and isinstance(v, str) and v.strip():
+                    force_map[DataCleaner.normalize_header_for_semantic_key(k)] = v.strip()
         normed_headers: List[str] = []
         updated: Dict[str, str] = {}
         for hp in header_paths:
@@ -489,12 +498,14 @@ class SchemaMapper:
             if not raw:
                 keys.append("")
                 continue
-            if raw in used:
-                used[raw] += 1
-                keys.append(f"{raw}__{idx + 1}")
+            # Prefer stable contextual names for known duplicate-prone semantic keys.
+            candidate = SchemaMapper._contextual_key_for_duplicate(raw, hp) or raw
+            if candidate in used:
+                used[candidate] += 1
+                keys.append(f"{candidate}__{idx + 1}")
             else:
-                used[raw] = 1
-                keys.append(raw)
+                used[candidate] = 1
+                keys.append(candidate)
         if any(c > 1 for c in used.values()):
             warnings.append("列语义存在重复键，已自动去重")
         return keys
@@ -635,4 +646,40 @@ class SchemaMapper:
             return "contract_company"
         if re.search(r"(公司名称|所属组织单位|组织单位|组织)", h):
             return "company"
+        return ""
+
+    @staticmethod
+    def _infer_group_from_header_path(header_path: str) -> str:
+        text = DataCleaner.normalize_header_compact(header_path)
+        if any(k in text for k in ["公积金", "住房公积金", "公积"]):
+            return "hf"
+        if any(k in text for k in ["社保", "社会保险"]):
+            return "ss"
+        if any(k in text for k in ["医保", "医疗"]):
+            return "med"
+        return ""
+
+    @staticmethod
+    def _contextual_key_for_duplicate(raw_key: str, header_path: str) -> str:
+        """
+        For duplicate-prone keys (amount/end_date), derive stable group-aware keys
+        from header context to avoid fragile ``__数字`` suffixes in final records.
+        """
+        group = SchemaMapper._infer_group_from_header_path(header_path)
+        if not group:
+            return ""
+        if raw_key == "amount":
+            if group == "ss":
+                return "ss_base"
+            if group == "hf":
+                return "hf_base"
+            if group == "med":
+                return "med_base"
+        if raw_key == "end_date":
+            if group == "ss":
+                return "ss_end_month"
+            if group == "hf":
+                return "hf_end_month"
+            if group == "med":
+                return "med_end_month"
         return ""

@@ -1,8 +1,11 @@
 """
-Specialized template handler for social security add/remove templates.
+社保模板专用处理模块 (Social Security Template Profile)
+=====================================================
 
-Detects templates with headers like: 姓名, 证件号码, 申报类型, 费用年月
-Builds constrained fill plans that only touch specific columns.
+针对社保增员/减员模板的专用处理逻辑。
+
+检测包含 姓名、证件号码、申报类型、费用年月 等表头的模板，
+构建仅填充特定列的约束性填充计划。
 """
 import re
 from datetime import datetime, date
@@ -320,12 +323,18 @@ def _date_candidates(intent: str) -> List[str]:
             "terminationdate",
             "leave_date",
             "leavedate",
+            "ss_end_month",
+            "hf_end_month",
             "离职日期",
+            "减员月份",
             "减员年月",
+            "停保月份",
+            "停保年月",
             "退工日期",
             "退保日期",
             "终止日期",
             "停保日期",
+            "费用年月",
         ]
     return []
 
@@ -1088,21 +1097,35 @@ def _select_sources_for_template(
 def _extract_records_from_source(
     source: Dict[str, Any],
     intent: str
-) -> Tuple[List[Dict[str, Any]], List[str]]:
+) -> Tuple[List[Dict[str, Any]], List[str], Dict[str, Any]]:
     records: List[Dict[str, Any]] = []
     warnings: List[str] = []
+    debug_info: Dict[str, Any] = {
+        "remove_sheet_counts_before_filter": {},
+        "remove_sheet_counts_after_filter": {},
+        "date_key_fallback_hits": 0,
+    }
     
     extracted = source.get("extracted")
     if not isinstance(extracted, dict):
-        return records, warnings
+        return records, warnings, debug_info
     
     data = extracted.get("data")
     if not isinstance(data, list):
-        return records, warnings
+        return records, warnings, debug_info
     
     source_filename = source.get("filename", "unknown")
     source_type = source.get("source_type", "unknown")
     source_id = source.get("source_id", "")
+
+    if intent == "remove":
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            sheet_name = str(item.get("__sheet_name__", "") or "")
+            debug_info["remove_sheet_counts_before_filter"][sheet_name] = (
+                debug_info["remove_sheet_counts_before_filter"].get(sheet_name, 0) + 1
+            )
     
     default_name_keys = ["name", "姓名", "员工姓名", "参保人"]
     default_id_keys = ["id_number", "身份证号", "证件号码", "employee_id", "工号"]
@@ -1136,7 +1159,7 @@ def _extract_records_from_source(
         proposed_date_key = selected_date_key
     else:
         warnings.append(date_key_reason or "required_field_missing:离职日期")
-        return records, warnings
+        return records, warnings, debug_info
     
     validation = _validate_and_fix_field_mappings(
         data, proposed_name_key, proposed_id_key, proposed_date_key, intent
@@ -1161,6 +1184,14 @@ def _extract_records_from_source(
             continue
         if intent == "add" and record_intent and record_intent != "add":
             continue
+
+        if intent == "remove":
+            sheet_name = str(item.get("__sheet_name__", "") or "")
+            if not any(k in sheet_name for k in ("减员", "离职")):
+                continue
+            debug_info["remove_sheet_counts_after_filter"][sheet_name] = (
+                debug_info["remove_sheet_counts_after_filter"].get(sheet_name, 0) + 1
+            )
         
         name = _get_record_value(item, name_key)
         if not name:
@@ -1176,6 +1207,7 @@ def _extract_records_from_source(
             continue
         
         event_date = None
+        used_fallback_date_key = False
         if date_key:
             val = _get_record_value_by_key(item, date_key)
             if val:
@@ -1184,12 +1216,17 @@ def _extract_records_from_source(
                     event_date = dt
         if not event_date:
             for dk in date_candidates:
+                if dk == date_key:
+                    continue
                 val = _get_record_value_by_key(item, dk)
                 if val:
                     dt = _parse_any_date(val)
                     if dt:
                         event_date = dt
+                        used_fallback_date_key = True
                         break
+        if used_fallback_date_key:
+            debug_info["date_key_fallback_hits"] = int(debug_info.get("date_key_fallback_hits", 0) or 0) + 1
         
         if not event_date:
             warnings.append(f"record_skipped_no_date:{name}")
@@ -1234,7 +1271,7 @@ def _extract_records_from_source(
             "__source_id__": source_id,
         })
     
-    return records, warnings
+    return records, warnings, debug_info
 
 
 def _deduplicate_records_advanced(
@@ -1406,7 +1443,8 @@ def build_social_security_fill_plan(
     llm: LLMClient,
     template_filename: str,
     profile: SocialSecurityProfile,
-    template_intent: str
+    template_intent: str,
+    planner_options: Optional[Dict[str, Any]] = None,
 ) -> FillPlan:
     debug_info: Dict[str, Any] = {
         "template_intent": template_intent,
@@ -1443,10 +1481,18 @@ def build_social_security_fill_plan(
     
     declare_type = "增" if template_intent == "add" else "减"
     
+    max_sources = 2
+    if isinstance(planner_options, dict):
+        insurance_opts = planner_options.get("insurance")
+        if isinstance(insurance_opts, dict):
+            configured_max = insurance_opts.get("max_sources")
+            if isinstance(configured_max, int) and configured_max > 0:
+                max_sources = configured_max
+
     selected_sources, source_scores, selection_warnings = _select_sources_for_template(
         extracted_json,
         template_intent,
-        max_sources=2
+        max_sources=max_sources,
     )
     warnings.extend(selection_warnings)
     
@@ -1467,12 +1513,26 @@ def build_social_security_fill_plan(
             for s in source_scores
         ],
     }
+    debug_info["remove_sheet_counts_before_filter"] = {}
+    debug_info["remove_sheet_counts_after_filter"] = {}
+    debug_info["date_key_fallback_hits"] = 0
     
     all_records: List[Dict[str, Any]] = []
     for source in selected_sources:
-        source_records, extract_warnings = _extract_records_from_source(source, template_intent)
+        source_records, extract_warnings, extract_debug = _extract_records_from_source(source, template_intent)
         all_records.extend(source_records)
         warnings.extend(extract_warnings)
+        for sn, cnt in (extract_debug.get("remove_sheet_counts_before_filter") or {}).items():
+            debug_info["remove_sheet_counts_before_filter"][sn] = (
+                debug_info["remove_sheet_counts_before_filter"].get(sn, 0) + int(cnt or 0)
+            )
+        for sn, cnt in (extract_debug.get("remove_sheet_counts_after_filter") or {}).items():
+            debug_info["remove_sheet_counts_after_filter"][sn] = (
+                debug_info["remove_sheet_counts_after_filter"].get(sn, 0) + int(cnt or 0)
+            )
+        debug_info["date_key_fallback_hits"] = int(debug_info.get("date_key_fallback_hits", 0) or 0) + int(
+            extract_debug.get("date_key_fallback_hits", 0) or 0
+        )
     
     debug_info["records_before_dedup"] = len(all_records)
     

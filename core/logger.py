@@ -1,9 +1,12 @@
 """
-Unified logging module for the EmailsInfoExtraction project.
+统一日志模块 (Unified Logging Module)
+====================================
 
-Usage:
+为 EmailsInfoExtraction 项目提供统一的日志配置和获取接口。
+
+使用示例:
     from core.logger import get_logger
-    
+
     logger = get_logger(__name__)
     logger.info("Processing file: %s", filename)
     logger.debug("Detailed debug info")
@@ -25,7 +28,11 @@ _root_configured = False
 
 
 def _configure_root_logger() -> None:
-    """Configure the root logger with console output handler."""
+    """
+    配置根日志器，添加控制台输出处理器。
+
+    仅执行一次，通过全局标志 _root_configured 避免重复配置。
+    """
     global _root_configured
     if _root_configured:
         return
@@ -49,16 +56,16 @@ def _configure_root_logger() -> None:
 
 def get_logger(name: str, level: Optional[int] = None) -> logging.Logger:
     """
-    Get a logger instance with the specified name.
-    
-    Args:
-        name: The name of the logger, typically __name__ of the calling module.
-        level: Optional logging level. If not specified, uses DEFAULT_LEVEL (INFO).
-    
-    Returns:
-        A configured logging.Logger instance.
-    
-    Example:
+    获取指定名称的日志器实例。
+
+    参数:
+        name: 日志器名称，通常传入调用模块的 __name__
+        level: 可选的日志级别；未指定时使用 DEFAULT_LEVEL (INFO)
+
+    返回:
+        已配置的 logging.Logger 实例
+
+    示例:
         logger = get_logger(__name__)
         logger.info("Starting extraction for file: %s", filepath)
     """
@@ -77,15 +84,15 @@ def get_logger(name: str, level: Optional[int] = None) -> logging.Logger:
 
 def set_level(level: int, logger_name: Optional[str] = None) -> None:
     """
-    Set the logging level for a specific logger or the root project logger.
-    
-    Args:
-        level: The logging level (e.g., logging.DEBUG, logging.INFO).
-        logger_name: Optional logger name. If None, sets level for root project logger.
-    
-    Example:
-        set_level(logging.DEBUG)  # Enable debug logging for all core modules
-        set_level(logging.DEBUG, "core.pipeline")  # Enable debug only for pipeline
+    设置指定日志器或项目根日志器的日志级别。
+
+    参数:
+        level: 日志级别（如 logging.DEBUG、logging.INFO）
+        logger_name: 可选的日志器名称；为 None 时设置项目根日志器
+
+    示例:
+        set_level(logging.DEBUG)  # 为所有 core 模块启用 debug
+        set_level(logging.DEBUG, "core.pipeline")  # 仅对 pipeline 启用 debug
     """
     if logger_name:
         logger = logging.getLogger(logger_name)

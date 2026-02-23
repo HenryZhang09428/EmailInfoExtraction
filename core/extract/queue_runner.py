@@ -1,13 +1,16 @@
 """
-QueueRunner: BFS traversal over source documents.
+队列运行器模块 (Queue Runner Module)
+===================================
 
-Handles:
-- visited-path tracking (prevents cycles)
-- file-existence validation
-- derived-file (attachment) enqueue
-- extraction error recovery
+对源文档进行 BFS 遍历处理。
 
-Does NOT build facts or do any post-processing.
+职责:
+- 已访问路径追踪（防止循环）
+- 文件存在性校验
+- 衍生文件（如附件）入队
+- 提取错误恢复
+
+不负责构建 facts 或任何后处理。
 """
 
 from __future__ import annotations
@@ -27,27 +30,24 @@ logger = get_logger(__name__)
 
 class QueueRunner:
     """
-    Breadth-first queue processor for source documents.
+    广度优先队列处理器，处理源文档列表。
 
-    Each document is extracted via the :class:`ExtractorRegistry`.
-    Derived files (email attachments, etc.) are automatically enqueued
-    for further processing.
+    通过 ExtractorRegistry 提取每个文档。
+    衍生文件（如邮件附件）自动入队继续处理。
     """
 
-    def __init__(self, registry: ExtractorRegistry):
+    def __init__(self, registry: ExtractorRegistry, router_options: Optional[dict] = None):
         self._registry = registry
+        self._router_options = router_options or None
 
     def run(
         self,
         initial_docs: List[SourceDoc],
-        *,
-        excel_sheet: Optional[str] = None,
     ) -> List[SourceDoc]:
         """
-        Process *initial_docs* and any derived files they produce.
+        处理 initial_docs 及其产生的衍生文件。
 
-        Returns the full list of processed :class:`SourceDoc` objects
-        (including derived documents).
+        返回完整处理后的 SourceDoc 列表（含衍生文档）。
         """
         queue: Deque[SourceDoc] = deque(initial_docs)
         processed: List[SourceDoc] = []
@@ -73,7 +73,7 @@ class QueueRunner:
             logger.debug("Processing: %s (type=%s)", doc.filename, doc.source_type)
 
             try:
-                result = self._registry.extract(doc, excel_sheet=excel_sheet)
+                result = self._registry.extract(doc)
                 doc.blocks = result.blocks
                 doc.extracted = result.extracted
 
@@ -85,7 +85,7 @@ class QueueRunner:
                         continue
                     if abs_path in visited:
                         continue
-                    derived_doc = self._create_derived_doc(abs_path, doc.source_id)
+                    derived_doc = self._create_derived_doc(abs_path, doc.source_id, router_options=self._router_options)
                     if derived_doc:
                         queue.append(derived_doc)
                     else:
@@ -141,8 +141,8 @@ class QueueRunner:
         ))
 
     @staticmethod
-    def _create_derived_doc(path: str, parent_source_id: str) -> Optional[SourceDoc]:
-        docs = route_files([path])
+    def _create_derived_doc(path: str, parent_source_id: str, router_options: Optional[dict] = None) -> Optional[SourceDoc]:
+        docs = route_files([path], router_options=router_options)
         if not docs:
             return None
         doc = docs[0]

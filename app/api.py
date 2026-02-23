@@ -1,3 +1,11 @@
+"""
+API 模块 (API Module)
+====================
+
+FastAPI 后端：提供 /process 处理接口和 /download 下载接口。
+支持文件上传或 JSON 传入路径两种方式。
+"""
+
 import shutil
 import tempfile
 from pathlib import Path
@@ -11,11 +19,13 @@ from app.backend.process import process_files, write_json_output
 
 app = FastAPI(title="Email Extraction Backend")
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_ROOT = Path.cwd() / "output"
 FILE_REGISTRY: Dict[str, str] = {}
 
 
 def _register_file(path: str) -> str:
+    """将文件路径注册到下载注册表，返回 file_id。"""
     file_id = uuid4().hex
     FILE_REGISTRY[file_id] = path
     return file_id
@@ -23,6 +33,7 @@ def _register_file(path: str) -> str:
 
 @app.get("/download/{file_id}")
 def download_file(file_id: str):
+    """根据 file_id 下载文件。"""
     path = FILE_REGISTRY.get(file_id)
     if not path or not Path(path).exists():
         raise HTTPException(status_code=404, detail="File not found")
@@ -35,6 +46,10 @@ async def process_endpoint(
     files: Optional[List[UploadFile]] = File(default=None),
     require_llm: bool = False,
 ):
+    """
+    处理接口：支持 multipart 文件上传或 JSON body（paths、profile_path、require_llm）。
+    返回 job_id、result、downloads（含下载 URL）。
+    """
     input_paths: List[str] = []
     upload_dir: Optional[Path] = None
 
@@ -55,6 +70,24 @@ async def process_endpoint(
         if data.get("require_llm") is not None:
             require_llm = bool(data.get("require_llm"))
         profile_path = data.get("profile_path")
+        company = data.get("company")
+        if (not profile_path) and company:
+            company_norm = str(company).strip().lower()
+            alias_map = {
+                "顺丰": "shunfeng",
+                "sf": "shunfeng",
+                "shunfeng": "shunfeng",
+                "天草": "tiancao",
+                "tc": "tiancao",
+                "tiancao": "tiancao",
+                "楚天龙": "chutianlong",
+                "ctl": "chutianlong",
+                "chutianlong": "chutianlong",
+            }
+            key = alias_map.get(company_norm, company_norm)
+            candidate = REPO_ROOT / "profiles" / f"{key}.yaml"
+            if candidate.exists():
+                profile_path = str(candidate)
         if not isinstance(paths, list) or not paths:
             raise HTTPException(status_code=400, detail="paths must be a non-empty list")
         input_paths = [str(Path(p).expanduser()) for p in paths]

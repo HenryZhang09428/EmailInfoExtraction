@@ -1,10 +1,13 @@
 """
-Pipeline: thin orchestrator that composes the extract → normalize → fill layers.
+流水线模块 (Pipeline Module)
+===========================
 
-run_extract   – file_paths → IntermediateRepresentation
-fill_template – IR + template → (output_path, schema, fill_plan_dict)
+薄编排层，组合 提取 → 规范化 → 填充 各阶段。
 
-Heavy lifting is delegated to:
+run_extract   – 文件路径 → 中间表示 (IntermediateRepresentation)
+fill_template – IR + 模板 → (输出路径, 模式, 填充计划字典)
+
+具体实现委托给:
   core.extract   – ExtractorRegistry, QueueRunner
   core.normalize – FactsBuilder, PayloadBuilder
   core.fill      – PlanRunner, WriterRunner
@@ -44,16 +47,17 @@ except ImportError:
 
 def run_extract(
     file_paths: List[str],
-    excel_sheet: Optional[str] = None,
+    extractor_options: Optional[dict] = None,
+    router_options: Optional[dict] = None,
 ) -> IntermediateRepresentation:
     """
-    Extract content from *file_paths* and return an IR.
+    从文件路径列表提取内容，返回中间表示 (IR)。
 
-    Steps:
-      1. Route files → SourceDoc list
-      2. QueueRunner (BFS) → extracted SourceDocs (incl. derived files)
-      3. FactsBuilder → Fact list
-      4. Assemble IR
+    步骤:
+      1. 路由文件 → SourceDoc 列表
+      2. QueueRunner (BFS) → 提取后的 SourceDoc（含衍生文件）
+      3. FactsBuilder → Fact 列表
+      4. 组装 IR
     """
     llm = get_llm_client()
     prompts = get_prompts()
@@ -61,13 +65,13 @@ def run_extract(
     logger.info("run_extract: %d files: %s", len(file_paths), file_paths)
 
     # 1. Route
-    initial_docs = route_files(file_paths)
+    initial_docs = route_files(file_paths, router_options=router_options)
     logger.debug("route_files → %d docs", len(initial_docs))
 
     # 2. BFS extraction
-    registry = ExtractorRegistry(llm, prompts)
-    runner = QueueRunner(registry)
-    processed = runner.run(initial_docs, excel_sheet=excel_sheet)
+    registry = ExtractorRegistry(llm, prompts, extractor_options=extractor_options)
+    runner = QueueRunner(registry, router_options=router_options)
+    processed = runner.run(initial_docs)
 
     # 3. Build facts
     facts = FactsBuilder.build(processed)
@@ -94,15 +98,16 @@ def fill_template(
     template_path: str,
     require_llm: bool = False,
     fill_plan_postprocess: Optional[Callable[[dict], Optional[dict]]] = None,
+    planner_options: Optional[dict] = None,
 ) -> Tuple[str, "TemplateSchema", dict]:
     """
-    Fill a template with data from *ir*.
+    用 IR 中的数据填充模板。
 
-    Steps:
-      1. Parse template schema
+    步骤:
+      1. 解析模板模式
       2. PayloadBuilder → {sources, merged}
-      3. PlanRunner → FillPlan (guaranteed type)
-      4. WriterRunner → output file + enriched plan dict
+      3. PlanRunner → FillPlan（保证类型）
+      4. WriterRunner → 输出文件 +  enriched 计划字典
     """
     if not _TEMPLATE_MODULE_AVAILABLE:
         raise ImportError("Template module is not available. Please check dependencies.")
@@ -124,6 +129,7 @@ def fill_template(
         llm,
         template_filename,
         require_llm=require_llm,
+        planner_options=planner_options,
     )
 
     total_rows = sum(len(rw.rows) for rw in fill_plan.row_writes)
@@ -150,7 +156,7 @@ def fill_template(
 # ---------------------------------------------------------------------------
 
 def build_stable_ir_signature(ir: Any) -> str:
-    """Produce a deterministic SHA-256 hash over the IR's extracted data."""
+    """对 IR 的提取数据生成确定性 SHA-256 哈希，用于缓存等场景。"""
     ir_obj = _to_plain_obj(ir)
     sources_value = getattr(ir, "sources", None)
     if sources_value is None and isinstance(ir_obj, dict):
@@ -190,6 +196,7 @@ def build_stable_ir_signature(ir: Any) -> str:
 # ---------------------------------------------------------------------------
 
 def _to_plain_obj(value: Any) -> Any:
+    """将 Pydantic 模型等转为普通 Python 对象（dict/list）。"""
     if hasattr(value, "model_dump") and callable(getattr(value, "model_dump")):
         return value.model_dump(mode="json")
     if hasattr(value, "dict") and callable(getattr(value, "dict")):
@@ -198,6 +205,7 @@ def _to_plain_obj(value: Any) -> Any:
 
 
 def _canonicalize_for_hash(value: Any) -> Any:
+    """规范化值以便生成确定性哈希（排序键、递归处理嵌套结构）。"""
     value = _to_plain_obj(value)
     if isinstance(value, dict):
         return {k: _canonicalize_for_hash(value[k]) for k in sorted(value.keys())}
@@ -215,21 +223,22 @@ def _extract_single_doc(
     source_doc: SourceDoc,
     llm: Any,
     prompts: dict,
-    excel_sheet: Optional[str] = None,
 ) -> List[str]:
-    """Backward-compatible wrapper used by tests.
+    """
+    向后兼容的包装函数，供测试使用。
 
-    Delegates to :class:`ExtractorRegistry` and mutates *source_doc* in place
-    (just like the old implementation).  Returns derived file paths.
+    委托给 ExtractorRegistry，就地修改 source_doc，
+    返回衍生文件路径列表。
     """
     registry = ExtractorRegistry(llm, prompts)
-    result = registry.extract(source_doc, excel_sheet=excel_sheet)
+    result = registry.extract(source_doc)
     source_doc.blocks = result.blocks
     source_doc.extracted = result.extracted
     return result.derived_files
 
 
 def _log_sources(docs: List[SourceDoc]) -> None:
+    """记录处理后的源文档列表到调试日志。"""
     logger.debug("Total sources after processing: %d", len(docs))
     for i, sd in enumerate(docs):
         logger.debug(

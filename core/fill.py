@@ -1,8 +1,11 @@
 """
-Fill layer: plan generation and template writing.
+填充层 (Fill Layer)
+==================
 
-PlanRunner   – invoke plan_fill, guarantee FillPlan output (Stage 2A contract)
-WriterRunner – apply plan → write → fallback → cells_written bookkeeping
+负责填充计划生成和模板写入。
+
+PlanRunner   – 调用 plan_fill，保证返回 FillPlan（Stage 2A 契约）
+WriterRunner – 应用计划 → 写入 → 回退 → cells_written 簿记
 """
 
 from __future__ import annotations
@@ -23,11 +26,10 @@ logger = get_logger(__name__)
 
 class PlanRunner:
     """
-    Wrapper around ``plan_fill`` that **guarantees** a :class:`FillPlan` return.
+    计划运行器：包装 plan_fill，保证返回 FillPlan。
 
-    If ``plan_fill`` raises or returns an unexpected type, the runner
-    catches it and returns an empty ``FillPlan`` carrying the error in
-    its *warnings* and *debug* fields.
+    若 plan_fill 抛出异常或返回非预期类型，则捕获并返回空 FillPlan，
+    错误信息写入 warnings 和 debug 字段。
     """
 
     @staticmethod
@@ -38,13 +40,18 @@ class PlanRunner:
         template_filename: str,
         *,
         require_llm: bool = False,
+        planner_options: Optional[dict] = None,
     ) -> FillPlan:
+        """
+        运行填充规划，返回 FillPlan。
+        异常时返回带警告的空 FillPlan。
+        """
         from core.template.fill_planner import plan_fill
 
         try:
             result = plan_fill(
                 template_schema, extracted, llm,
-                template_filename, require_llm=require_llm,
+                template_filename, require_llm=require_llm, planner_options=planner_options,
             )
         except Exception as exc:
             msg = f"{type(exc).__name__}: {str(exc)[:200]}"
@@ -74,13 +81,13 @@ class PlanRunner:
 
 class WriterRunner:
     """
-    Apply a :class:`FillPlan` to a template file.
+    写入运行器：将 FillPlan 应用到模板文件。
 
-    Handles:
-    - output path resolution
-    - optional ``fill_plan_postprocess`` hook
-    - fallback plan when LLM plan writes 0 cells
-    - ``cells_written`` / ``fill_status`` bookkeeping in *debug*
+    处理:
+    - 输出路径解析
+    - 可选的 fill_plan_postprocess 钩子
+    - LLM 计划写入 0 格时的回退计划
+    - cells_written / fill_status 的 debug 簿记
     """
 
     @staticmethod
@@ -94,8 +101,8 @@ class WriterRunner:
         fill_plan_postprocess: Optional[Callable[[dict], Optional[dict]]] = None,
     ) -> Tuple[str, dict]:
         """
-        Returns ``(output_path, fill_plan_dict)`` where *fill_plan_dict*
-        is enriched with ``debug.cells_written`` and ``debug.fill_status``.
+        返回 (output_path, fill_plan_dict)，其中 fill_plan_dict
+        会包含 debug.cells_written 和 debug.fill_status。
         """
         from core.template.writer import apply_fill_plan
         from core.template.fill_planner import build_fallback_fill_plan

@@ -1,12 +1,23 @@
+"""
+中间表示模块 (Intermediate Representation Module)
+================================================
+
+定义提取与填充流程中的核心数据结构：SourceDoc、Fact、FillPlan 等。
+"""
+
 from typing import Literal, Any, Optional, List
 from enum import Enum
 from pydantic import BaseModel
 
+# 文档来源类型
 SourceType = Literal["excel", "email", "image", "text", "other", "error"]
 
 
 class BlockType(str, Enum):
-    """Enum for SourceBlock types ensuring type safety across the codebase."""
+    """
+    SourceBlock 类型枚举，确保全代码库中的类型安全。
+    涵盖文本、表格、OCR、邮件、图片、二进制等多种块类型。
+    """
     TEXT = "text"
     TABLE_CSV = "table_csv"
     OCR_TEXT = "ocr_text"
@@ -32,32 +43,64 @@ class BlockType(str, Enum):
 
 
 class SourceBlock(BaseModel):
+    """
+    源文档块模型，表示文档中的一个逻辑块（如一段文本、一个表格）。
+
+    属性:
+        order: 块在文档中的顺序
+        type: 块类型（BlockType 枚举）
+        content: 块内容
+        meta: 元数据
+    """
     order: int
     type: BlockType
     content: Any
     meta: dict
 
     class Config:
-        use_enum_values = True  # Serialize enum as its value
+        use_enum_values = True  # 序列化时使用枚举值
 
 
 class SourceDoc(BaseModel):
+    """
+    源文档模型，表示一个输入文件及其提取结果。
+
+    属性:
+        source_id: 文档唯一标识
+        filename: 文件名
+        file_path: 文件绝对路径（必填，用于唯一标识）
+        source_type: 来源类型
+        blocks: 文档块列表
+        extracted: 提取结果（任意结构）
+        parent_source_id: 父文档 ID（如从邮件附件衍生）
+    """
     source_id: str
     filename: str
-    file_path: str  # Mandatory field for unique document identification
+    file_path: str  # 必填字段，用于唯一标识文档
     source_type: SourceType
     blocks: List[SourceBlock]
     extracted: Any
     parent_source_id: Optional[str] = None
 
+
 class Fact(BaseModel):
+    """
+    事实模型，表示一条从提取结果中得到的结构化事实。
+
+    属性:
+        name: 事实名称/键
+        value: 事实值
+        sources: 来源引用列表
+    """
     name: str
     value: Any
     sources: List[dict]
 
 
 class FillPlanTarget(BaseModel):
-    """Target specification for a fill plan."""
+    """
+    填充计划目标模型，指定填充的目标工作表、区域等。
+    """
     sheet: Optional[str] = None
     region_id: Optional[str] = None
     layout_type: Optional[str] = None
@@ -65,13 +108,17 @@ class FillPlanTarget(BaseModel):
 
 
 class RowWrite(BaseModel):
-    """A row write operation in a fill plan."""
+    """
+    行写入操作模型，表示填充计划中的批量行写入。
+    """
     start_cell: str
     rows: List[dict]
     column_mapping: dict
 
 class CellWrite(BaseModel):
-    """A single cell write operation."""
+    """
+    单元格写入操作模型，表示单格写入。
+    """
     cell: str
     value: Any
     sheet: Optional[str] = None
@@ -79,8 +126,10 @@ class CellWrite(BaseModel):
 
 class FillPlan(BaseModel):
     """
-    Standardized output for template fill planning.
-    Ensures type-safe, validated fill plan structure.
+    填充计划模型，模板填充规划的标准输出。
+
+    确保类型安全、结构校验的填充计划。
+    属性包括目标、清除范围、行写入、单元格写入、警告等。
     """
     target: FillPlanTarget
     clear_ranges: List[str] = []
@@ -93,7 +142,7 @@ class FillPlan(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict) -> "FillPlan":
-        """Create a FillPlan from a dictionary, handling nested objects."""
+        """从字典创建 FillPlan，处理嵌套对象。"""
         target_data = data.get("target", {})
         target = FillPlanTarget(**target_data) if isinstance(target_data, dict) else FillPlanTarget()
         
@@ -119,7 +168,7 @@ class FillPlan(BaseModel):
         )
 
     def to_dict(self) -> dict:
-        """Convert to dictionary for backward compatibility."""
+        """转换为字典，保持向后兼容。"""
         return {
             "target": self.target.model_dump(exclude_none=True),
             "clear_ranges": self.clear_ranges,
@@ -133,13 +182,25 @@ class FillPlan(BaseModel):
 
 
 class IntermediateRepresentation(BaseModel):
+    """
+    中间表示模型，贯穿提取与填充流程的核心数据结构。
+
+    属性:
+        sources: 源文档列表
+        facts: 事实列表
+        target_schema: 目标模式（可选）
+        output: 输出结果（可选）
+        scores: 评分信息（可选）
+    """
     sources: List[SourceDoc]
     facts: List[Fact]
     target_schema: Optional[Any] = None
     output: Optional[Any] = None
     scores: Optional[dict] = None
 
+
 def new_ir() -> IntermediateRepresentation:
+    """创建空的中间表示实例。"""
     return IntermediateRepresentation(
         sources=[],
         facts=[],

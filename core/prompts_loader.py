@@ -1,17 +1,30 @@
+"""
+提示词加载模块 (Prompts Loader Module)
+=====================================
+
+从 Markdown 文件加载 LLM 所需的各类提示词，支持环境变量指定文件路径。
+"""
+
 import re
 import os
 from pathlib import Path
 
+# 需要从 prompt 文件中解析的提示词键名
 PROMPT_KEYS = [
     "EXCEL_SCHEMA_INFER_PROMPT",
     "EMAIL_TO_JSON_PROMPT",
     "EML_BODY_TO_JSON_PROMPT",
+    "EMAIL_LEAVE_LINES_TO_JSON_PROMPT",
 ]
 
+# 提示词缓存，避免重复读取文件
 _prompts_cache = None
 
 
 def _resolve_prompt_file(project_root: Path) -> Path:
+    """
+    解析提示词文件路径：优先使用 PROMPT_FILE 环境变量，否则使用项目根下的 prompt.md。
+    """
     configured = os.getenv("PROMPT_FILE", "").strip()
     if not configured:
         return project_root / "prompt.md"
@@ -22,6 +35,10 @@ def _resolve_prompt_file(project_root: Path) -> Path:
 
 
 def get_prompts() -> dict:
+    """
+    获取所有提示词，按 PROMPT_KEYS 解析 prompt 文件中的 ## 标题段落。
+    结果会缓存，避免重复读取。
+    """
     global _prompts_cache
     if _prompts_cache is not None:
         return _prompts_cache

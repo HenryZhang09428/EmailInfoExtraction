@@ -1,12 +1,14 @@
 """
-邮件抽取模块：用于从邮件相关文件中提取结构化信息（`.eml` / `.txt` / `.docx`）。
+邮件提取器模块 (Email Extractor Module)
+======================================
+
+用于从邮件相关文件中提取结构化信息（`.eml` / `.txt` / `.docx`）。
 
 该文件定位为“轻量编排器”：复杂的解析、清洗、导出等逻辑被拆分到
 `core.extractors.email` 子包内的专用类中；本模块负责串联流程、组织 `SourceDoc` 输出，
 并保持对外接口（`EmailExtractor.extract()`）不变。
 
 职责划分（按模块）：
-
 - `EmailParser`：解析 MIME、解码邮件头、抽取 text/html 正文与部件元信息
 - `AttachmentHandler`：导出附件/内联资源、去重、推断扩展名、文件名清洗
 - `ContentCleaner`：HTML→纯文本、线程截断、LLM 输出形状校正、字段值规整

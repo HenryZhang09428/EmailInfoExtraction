@@ -141,6 +141,99 @@ class ExcelReader:
 
         return df, backend, fallback_used, row_index_zero_detected
 
+    # ------------------------------------------------------------------
+    # Smart multi-sheet selection (automatic)
+    # ------------------------------------------------------------------
+
+    # Very low bar — we'd rather over-extract than miss useful data.
+    _DEFAULT_MIN_USEFUL_CELLS = 3
+
+    def select_useful_sheets(
+        self,
+        file_path: str,
+        min_non_empty: int = _DEFAULT_MIN_USEFUL_CELLS,
+    ) -> Tuple[List[str], Dict[str, Any]]:
+        """
+        Scan all sheets and return those that likely contain useful data.
+
+        Uses the same cheap heuristic as ``choose_best_sheet`` (first
+        30 rows × 80 cols) but returns **all** sheets that pass a lenient
+        content threshold, rather than picking just one winner.
+
+        A sheet is kept if:
+
+        - It has a detected header-like row (``best_header_like_score``
+          is not ``None``), **OR**
+        - It has at least *min_non_empty* non-empty cells in the scan
+          window.
+
+        The threshold is deliberately very low so that we prefer
+        over-extraction over missing any sheet that contains real data.
+
+        Returns ``(useful_sheet_names, selection_debug)``.
+        """
+        best_name, debug = self.choose_best_sheet(file_path, preferred_sheet=None)
+        sheets_info = debug.get("sheets", [])
+
+        useful: List[str] = []
+        skipped: List[str] = []
+
+        for s in sheets_info:
+            name = s.get("sheet_name")
+            if not isinstance(name, str):
+                continue
+            header_score = s.get("best_header_like_score")
+            non_empty = s.get("non_empty_cells_count", 0) or 0
+
+            has_header = header_score is not None
+            has_content = non_empty >= min_non_empty
+
+            if has_header or has_content:
+                useful.append(name)
+            else:
+                skipped.append(name)
+
+        # If nothing passed (shouldn't happen often), keep the best one.
+        if not useful and best_name:
+            useful = [best_name]
+
+        # Sort: sheets with a header first (by score desc), then by
+        # non_empty desc.  This way the "best" sheet is always first.
+        sheet_lookup = {
+            s["sheet_name"]: s
+            for s in sheets_info
+            if isinstance(s.get("sheet_name"), str)
+        }
+
+        def _sort_key(name: str) -> tuple:
+            info = sheet_lookup.get(name, {})
+            hs = info.get("best_header_like_score")
+            ne = info.get("non_empty_cells_count", 0) or 0
+            return (
+                1 if hs is not None else 0,
+                float(hs) if hs is not None else -1e18,
+                ne,
+            )
+
+        useful.sort(key=_sort_key, reverse=True)
+
+        selection_debug = {
+            "useful_sheets": useful,
+            "skipped_sheets": skipped,
+            "best_sheet": best_name,
+            "scan_details": sheets_info,
+            "min_non_empty_threshold": min_non_empty,
+        }
+
+        logger.info(
+            "Sheet selection: %d useful / %d total (useful=%s, skipped=%s)",
+            len(useful), len(sheets_info), useful, skipped,
+        )
+
+        return useful, selection_debug
+
+    # ------------------------------------------------------------------
+
     def list_sheet_names(self, file_path: str) -> Tuple[List[str], str]:
         suffix = Path(file_path).suffix.lower()
         if suffix == ".xls":

@@ -1,0 +1,46 @@
+# =========================
+# 顺丰 - Profile 配置
+# =========================
+#
+# 目标：
+# - 针对“顺丰”来源文件的常见类型做路由/过滤配置
+# - 其它模板/关键词等可按需继续覆盖
+#
+
+profile_id: "shunfeng_profile_v1"
+
+# router: 源文件类型/扩展名配置（影响输入文件与衍生文件的路由与是否入队）
+router:
+  # 允许处理的 source_type（不在列表内的文件会被跳过）
+  allowed_source_types: ["excel", "email", "text", "image"]
+
+  # 仅处理这些扩展名（留空则不限制）
+  allowed_extensions: [".xlsx", ".xls", ".eml", ".docx", ".txt", ".csv", ".png", ".jpg", ".jpeg", ".webp"]
+
+  # 遇到未知扩展名时是否直接跳过（true：跳过；false：路由为 other）
+  ignore_unknown_extensions: true
+
+  # 可选：按扩展名强制指定 source_type（优先级高于默认路由）
+  # extension_overrides:
+  #   ".log": "text"
+
+excel:
+  sheet: "auto"
+
+templates:
+  - key: "add"
+    template_path: "app/templates/目标1模版：社保增员表.xlsx"
+    output_name: "filled_add.xlsx"
+    max_sources: 2
+    fill_columns: ["A", "B", "C", "D"]
+    special_field_to_column:
+      证件号码: "B"
+      身份证号码: "B"
+
+insurance:
+  add_keywords: ["增员", "增加", "入职", "新增", "add"]
+  remove_keywords: ["减员", "减少", "离职", "删除", "remove", "停保"]
+  header_force_map:
+    身份证号码: "id_number"
+    证件号码: "id_number"
+

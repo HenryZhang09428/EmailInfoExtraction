@@ -1,3 +1,11 @@
+"""
+后端处理模块 (Backend Process Module)
+====================================
+
+封装文件处理流水线：提取 → 填充模板 → 输出 JSON。
+支持 profile 配置和默认模板。
+"""
+
 import json
 import os
 import shutil
@@ -20,6 +28,10 @@ DEFAULT_TEMPLATE_REMOVE_NAME = "目标2模版：社保减员表.xlsx"
 
 
 def resolve_template_paths() -> Dict[str, Path]:
+    """
+    解析增员/减员模板路径。
+    优先使用 TEMPLATE_ADD_PATH、TEMPLATE_REMOVE_PATH 环境变量。
+    """
     add_name = os.getenv("TEMPLATE_ADD_NAME", DEFAULT_TEMPLATE_ADD_NAME)
     remove_name = os.getenv("TEMPLATE_REMOVE_NAME", DEFAULT_TEMPLATE_REMOVE_NAME)
     templates = {
@@ -40,6 +52,7 @@ def resolve_template_paths() -> Dict[str, Path]:
 
 
 def _resolve_template_path_from_env_or_default(template_key: str, template_name: str) -> Path:
+    """从环境变量或默认目录解析模板路径。"""
     env_key = f"TEMPLATE_{template_key.upper()}_PATH"
     env_path = os.getenv(env_key, "").strip()
     if env_path:
@@ -51,12 +64,14 @@ def _resolve_template_path_from_env_or_default(template_key: str, template_name:
 
 
 def ensure_output_dir(output_dir: str) -> Path:
+    """确保输出目录存在，不存在则创建。"""
     output_path = Path(output_dir).resolve()
     output_path.mkdir(parents=True, exist_ok=True)
     return output_path
 
 
 def _build_source_dict(source: Any) -> Dict[str, Any]:
+    """将 SourceDoc 转为可序列化的字典。"""
     return {
         "source_id": getattr(source, "source_id", None),
         "filename": getattr(source, "filename", None),
@@ -67,6 +82,7 @@ def _build_source_dict(source: Any) -> Dict[str, Any]:
 
 
 def _summarize_sources(sources: List[Any]) -> Dict[str, Any]:
+    """汇总源文档：按类型统计、收集错误信息。"""
     by_type: Dict[str, int] = {}
     errors = []
     for src in sources:
@@ -93,6 +109,9 @@ def apply_fill_plan_overrides(
     fill_columns: Optional[List[str]] = None,
     special_field_to_column: Optional[Dict[str, str]] = None,
 ) -> dict:
+    """
+    根据 profile 配置覆盖填充计划：fill_columns 限制列、special_field_to_column 强制映射。
+    """
     if not isinstance(fill_plan_dict, dict):
         return fill_plan_dict
     allowed = None
@@ -139,7 +158,12 @@ def _fill_with_template(
     require_llm: bool = False,
     output_name: Optional[str] = None,
     fill_plan_postprocess: Optional[Any] = None,
+    planner_options: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
+    """
+    用 IR 填充单个模板，复制到临时目录执行后移动到 output_dir。
+    返回 (输出文件路径, 填充计划字典)。
+    """
     template_label = template_path.stem
     work_dir = Path(
         tempfile.mkdtemp(prefix=f"work_{template_label}_", dir=str(output_dir))
@@ -152,6 +176,7 @@ def _fill_with_template(
             str(template_copy),
             require_llm=require_llm,
             fill_plan_postprocess=fill_plan_postprocess,
+            planner_options=planner_options,
         )
         final_name = output_name or f"{template_label}_filled.xlsx"
         final_path = output_dir / final_name
@@ -167,6 +192,9 @@ def build_readable_output(
     input_files: List[str],
     output_dir: str,
 ) -> Dict[str, Any]:
+    """
+    构建可读输出：meta、summary、fills、sources。
+    """
     sources = getattr(ir, "sources", []) or []
     summary = _summarize_sources(sources)
     return {
@@ -187,24 +215,61 @@ def process_files(
     require_llm: bool = False,
     profile_path: Optional[str] = None,
 ) -> Dict[str, Any]:
+    """
+    处理文件：提取 → 按 profile 或默认模板填充 → 返回可读输出。
+
+    参数:
+        file_paths: 输入文件路径列表
+        output_dir: 输出目录
+        require_llm: 是否强制使用 LLM
+        profile_path: 可选 profile 路径，未指定则用默认模板
+    """
     if not file_paths:
         raise ValueError("No input files provided.")
 
     output_path = ensure_output_dir(output_dir)
     profile = None
     templates = None
-    excel_sheet = None
+    insurance_options: Dict[str, Any] = {}
+    router_options: Optional[Dict[str, Any]] = None
+    excel_preferred_sheet: Optional[str] = None
     if profile_path:
         profile = load_profile(profile_path)
-        excel_sheet = (profile.get("excel") or {}).get("sheet")
-        if not isinstance(excel_sheet, str) or excel_sheet.strip() == "" or excel_sheet == "auto":
-            excel_sheet = None
         templates = profile.get("templates") or []
+        if isinstance(profile.get("insurance"), dict):
+            insurance_options = dict(profile.get("insurance") or {})
+        if isinstance(profile.get("router"), dict) and profile.get("router"):
+            router_options = dict(profile.get("router") or {})
+        excel_cfg = profile.get("excel") if isinstance(profile, dict) else None
+        if isinstance(excel_cfg, dict):
+            sheet = excel_cfg.get("sheet")
+            if isinstance(sheet, str) and sheet.strip() and sheet.strip().lower() != "auto":
+                excel_preferred_sheet = sheet.strip()
+            extract_mode = excel_cfg.get("extract_mode")
+            if isinstance(extract_mode, str) and extract_mode.strip().lower() in {"auto", "single", "all"}:
+                excel_extract_mode = extract_mode.strip().lower()
+            else:
+                excel_extract_mode = None
+        else:
+            excel_extract_mode = None
     else:
         templates = resolve_template_paths()
+        excel_extract_mode = None
 
     logger.info("Processing %d files", len(file_paths))
-    ir = run_extract(file_paths, excel_sheet=excel_sheet)
+    extractor_options: Dict[str, Any] = {}
+    if isinstance(excel_preferred_sheet, str) and excel_preferred_sheet.strip():
+        extractor_options["excel_preferred_sheet"] = excel_preferred_sheet.strip()
+    if isinstance(excel_extract_mode, str) and excel_extract_mode:
+        extractor_options["excel_extract_mode"] = excel_extract_mode
+    header_force_map = insurance_options.get("header_force_map")
+    if isinstance(header_force_map, dict) and header_force_map:
+        extractor_options["header_force_map"] = header_force_map
+    ir = run_extract(
+        file_paths,
+        extractor_options=extractor_options or None,
+        router_options=router_options,
+    )
 
     fill_results: Dict[str, Dict[str, Any]] = {}
     if profile_path:
@@ -222,7 +287,17 @@ def process_files(
                 raise FileNotFoundError(f"Template not found: {template_path}")
             fill_columns = job.get("fill_columns")
             special_field_to_column = job.get("special_field_to_column")
-            output_name = f"filled_{key}.xlsx"
+            output_name = (
+                job.get("output_name")
+                if isinstance(job.get("output_name"), str) and str(job.get("output_name")).strip()
+                else f"filled_{key}.xlsx"
+            )
+            max_sources = job.get("max_sources") if isinstance(job.get("max_sources"), int) else None
+            planner_options: Dict[str, Any] = {}
+            if insurance_options:
+                planner_options["insurance"] = dict(insurance_options)
+            if max_sources is not None:
+                planner_options.setdefault("insurance", {})["max_sources"] = max_sources
 
             def _postprocess(fill_plan_dict: dict) -> dict:
                 return apply_fill_plan_overrides(
@@ -238,6 +313,7 @@ def process_files(
                 require_llm=require_llm,
                 output_name=output_name,
                 fill_plan_postprocess=_postprocess,
+                planner_options=planner_options or None,
             )
             fill_results[key] = {
                 "template": str(template_path),
@@ -285,6 +361,10 @@ def write_json_output(
     output_dir: str,
     output_filename: Optional[str] = None,
 ) -> str:
+    """
+    将结果写入 JSON 文件到 output_dir。
+    文件名可由 output_filename 或 OUTPUT_JSON_NAME 环境变量指定。
+    """
     output_path = Path(output_dir).resolve()
     output_path.mkdir(parents=True, exist_ok=True)
     json_path = output_path / _resolve_output_json_name(output_filename)

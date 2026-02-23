@@ -1,3 +1,10 @@
+"""
+命令行接口模块 (CLI Module)
+=========================
+
+提供提取与模板填充的命令行入口。
+"""
+
 import argparse
 import sys
 from datetime import datetime
@@ -12,6 +19,9 @@ from app.backend.process import process_files, write_json_output
 
 
 def collect_source_paths(inputs: List[str]) -> List[str]:
+    """
+    收集输入路径：目录则递归收集所有文件，文件则直接加入。
+    """
     collected: List[str] = []
     for raw in inputs:
         path = Path(raw).expanduser()
@@ -27,6 +37,7 @@ def collect_source_paths(inputs: List[str]) -> List[str]:
 
 
 def parse_args() -> argparse.Namespace:
+    """解析命令行参数。"""
     parser = argparse.ArgumentParser(
         description="Run extraction and fill two embedded templates."
     )
@@ -52,6 +63,12 @@ def parse_args() -> argparse.Namespace:
         help="Path to a profile YAML file.",
     )
     parser.add_argument(
+        "--company",
+        default=None,
+        help="Company preset profile (顺丰/天草/楚天龙 or shunfeng/tiancao/chutianlong). "
+             "Ignored when --profile-path is provided.",
+    )
+    parser.add_argument(
         "--output-json-name",
         default=None,
         help="Output JSON filename (default: result.json, or env OUTPUT_JSON_NAME).",
@@ -65,17 +82,39 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """主入口：收集输入、调用 process_files、输出 JSON 和填充结果路径。"""
     args = parse_args()
     file_paths = collect_source_paths(args.inputs)
     if not file_paths:
         print("[error] no valid input files found.")
         return 1
 
+    profile_path = args.profile_path
+    if not profile_path and args.company:
+        company = str(args.company).strip().lower()
+        alias_map = {
+            "顺丰": "shunfeng",
+            "sf": "shunfeng",
+            "shunfeng": "shunfeng",
+            "天草": "tiancao",
+            "tc": "tiancao",
+            "tiancao": "tiancao",
+            "楚天龙": "chutianlong",
+            "ctl": "chutianlong",
+            "chutianlong": "chutianlong",
+        }
+        key = alias_map.get(company, company)
+        candidate = REPO_ROOT / "profiles" / f"{key}.yaml"
+        if candidate.exists():
+            profile_path = str(candidate)
+        else:
+            print(f"[warn] company profile not found: {candidate} (falling back to default behavior)")
+
     result = process_files(
         file_paths=file_paths,
         output_dir=args.output_dir,
         require_llm=args.require_llm,
-        profile_path=args.profile_path,
+        profile_path=profile_path,
     )
     output_json_name = args.output_json_name
     if args.output_json_timestamp and not output_json_name:

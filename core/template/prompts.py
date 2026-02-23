@@ -1,5 +1,13 @@
+"""
+模板填充提示词模块 (Template Fill Prompts Module)
+================================================
+
+定义 LLM 用于模板列映射、常量推断、记录过滤等的提示词。
+"""
+
 import json
 
+# 主模板填充提示词：列映射、常量值、记录过滤、派生字段
 TEMPLATE_FILL_PROMPT = """You are a data mapping assistant. Your task is to infer how template columns map to extracted JSON keys, and identify constant values that should be applied to all rows.
 
 ## Input
@@ -196,6 +204,7 @@ Output:
 - If a header has no mapping and no inferable constant, omit it entirely"""
 
 
+# 保险模板参数选择提示词：选择 selected_source_id、name_key、effective_date_key
 INSURANCE_TEMPLATE_PARAM_PROMPT = """You are selecting parameters for an insurance add/remove template.
 
 ## Goal
@@ -234,6 +243,17 @@ def build_insurance_param_prompt(
     template_headers: list,
     sources_profile: list
 ) -> str:
+    """
+    构建保险模板参数选择的完整提示词。
+
+    参数:
+        template_intent: 模板意图（add/remove 等）
+        template_headers: 模板表头列表
+        sources_profile: 各数据源的概要（record_keys、sample_records 等）
+
+    返回:
+        拼接后的提示词字符串
+    """
     def _trim_list(values: list, limit: int) -> list:
         if not isinstance(values, list):
             return []

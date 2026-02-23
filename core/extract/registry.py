@@ -1,8 +1,10 @@
 """
-ExtractorRegistry: maps source_type -> extraction handler.
+提取器注册表模块 (Extractor Registry Module)
+==========================================
 
-Each handler returns an ExtractResult (blocks, extracted, derived_files)
-so the pipeline never needs to know which extractor class to instantiate.
+将 source_type 映射到对应的提取处理器。
+每个处理器返回 ExtractResult（blocks、extracted、derived_files），
+流水线无需知道具体使用哪个提取器类。
 """
 
 from __future__ import annotations
@@ -24,7 +26,14 @@ logger = get_logger(__name__)
 
 @dataclass
 class ExtractResult:
-    """Uniform output produced by every extraction handler."""
+    """
+    提取结果数据类，所有提取处理器统一返回此结构。
+
+    属性:
+        blocks: 源文档块列表
+        extracted: 提取的 JSON 等结构化数据
+        derived_files: 衍生文件路径列表（如邮件附件）
+    """
     blocks: List[SourceBlock]
     extracted: Any
     derived_files: List[str] = field(default_factory=list)
@@ -35,41 +44,42 @@ class ExtractResult:
 # ---------------------------------------------------------------------------
 
 # Type alias for extraction handlers.
-# Signature: (source_doc, *, excel_sheet) -> ExtractResult
+# Signature: (source_doc) -> ExtractResult
 ExtractHandler = Callable[..., ExtractResult]
 
 
 class ExtractorRegistry:
     """
-    Registry that maps *source_type* to an extraction handler.
+    提取器注册表：将 source_type 映射到提取处理器。
 
-    Built-in handlers are registered at construction time; callers can
-    override or extend via :meth:`register`.
+    构造时注册内置处理器；调用方可通过 register 覆盖或扩展。
     """
 
-    def __init__(self, llm: LLMClient, prompts: dict):
+    def __init__(
+        self,
+        llm: LLMClient,
+        prompts: dict,
+        extractor_options: Optional[Dict[str, Any]] = None,
+    ):
         self._llm = llm
         self._prompts = prompts
+        self._extractor_options = extractor_options or {}
         self._handlers: Dict[str, ExtractHandler] = {}
         self._register_defaults()
 
     # -- public API ----------------------------------------------------------
 
     def register(self, source_type: str, handler: ExtractHandler) -> None:
+        """注册或覆盖指定 source_type 的处理器。"""
         self._handlers[source_type] = handler
 
-    def extract(
-        self,
-        source_doc: SourceDoc,
-        *,
-        excel_sheet: Optional[str] = None,
-    ) -> ExtractResult:
-        """Dispatch extraction to the registered handler for *source_doc.source_type*."""
+    def extract(self, source_doc: SourceDoc) -> ExtractResult:
+        """根据 source_doc.source_type 分发到对应处理器执行提取。"""
         handler = self._handlers.get(source_doc.source_type)
         if handler is None:
             logger.warning("No handler for source_type=%s (%s)", source_doc.source_type, source_doc.filename)
             return ExtractResult(blocks=[], extracted=None)
-        return handler(source_doc, excel_sheet=excel_sheet)
+        return handler(source_doc)
 
     # -- built-in handlers ---------------------------------------------------
 
@@ -80,28 +90,110 @@ class ExtractorRegistry:
         self.register("text", self._handle_text)
         self.register("other", self._handle_other)
 
-    # ---- Excel (includes 0-row retry) ----
+    # ---- Excel (smart automatic multi-sheet) ----
 
-    def _handle_excel(self, source_doc: SourceDoc, *, excel_sheet: Optional[str] = None) -> ExtractResult:
+    def _handle_excel(self, source_doc: SourceDoc) -> ExtractResult:
         from core.extractors import ExcelExtractor
+        from core.extractors.excel.reader import ExcelReader
 
-        extractor = ExcelExtractor(self._llm, self._prompts)
-        result = extractor.safe_extract(
-            source_doc.file_path,
-            extract_all_sheets=False,
-            preferred_sheet=excel_sheet,
+        header_force_map = self._extractor_options.get("header_force_map")
+        preferred_sheet_cfg = self._extractor_options.get("excel_preferred_sheet")
+        preferred_sheet = preferred_sheet_cfg.strip() if isinstance(preferred_sheet_cfg, str) and preferred_sheet_cfg.strip() else None
+        extractor = ExcelExtractor(
+            self._llm,
+            self._prompts,
+            header_force_map=header_force_map if isinstance(header_force_map, dict) else None,
         )
 
-        # Retry with all sheets when single-sheet extraction returns 0 rows
-        payload = result.extracted if isinstance(result.extracted, dict) else {}
-        rows = payload.get("data") if isinstance(payload, dict) else None
-        if (isinstance(rows, list) and len(rows) == 0) or rows is None:
-            if excel_sheet is None:
-                logger.info("Excel 0-row retry with extract_all_sheets=True for %s", source_doc.filename)
+        # ------------------------------------------------------------------
+        # Multi-sheet extraction strategy (configurable via profile YAML).
+        #
+        # extract_mode (from profile excel.extract_mode):
+        #   "auto"   — (default) smart automatic: scan all sheets, extract
+        #               ≥ 2 useful sheets and merge; 0-row fallback retry.
+        #   "single" — only extract one sheet (best or preferred).
+        #   "all"    — always extract ALL sheets and merge records.
+        # ------------------------------------------------------------------
+
+        extract_mode_cfg = self._extractor_options.get("excel_extract_mode")
+        extract_mode = (
+            extract_mode_cfg.strip().lower()
+            if isinstance(extract_mode_cfg, str) and extract_mode_cfg.strip().lower() in {"auto", "single", "all"}
+            else "auto"
+        )
+        logger.info("Excel extract_mode=%s for %s", extract_mode, source_doc.filename)
+
+        if extract_mode == "single":
+            # ---- Single sheet mode: only extract best / preferred sheet ----
+            result = extractor.safe_extract(
+                source_doc.file_path,
+                extract_all_sheets=False,
+                preferred_sheet=preferred_sheet,
+            )
+
+        elif extract_mode == "all":
+            # ---- All sheets mode: always extract every sheet ----
+            result = extractor.safe_extract(
+                source_doc.file_path,
+                extract_all_sheets=True,
+                preferred_sheet=preferred_sheet,
+            )
+
+        else:
+            # ---- Auto mode (default): smart multi-sheet detection ----
+            # 1. Cheaply scan all sheets (first 30 rows × 80 cols), keep
+            #    every sheet that has a header-like row OR ≥ 3 non-empty
+            #    cells.  The threshold is deliberately very low: we prefer
+            #    over-extraction to missing useful data.
+            #    - 1 useful sheet  → single-sheet path (fast)
+            #    - ≥ 2 useful sheets → extract all and merge records
+            # 2. Final fallback: if the merged result contains 0 rows,
+            #    retry with truly ALL sheets (no filter) so nothing is lost.
+
+            reader = ExcelReader()
+            try:
+                useful_sheets, selection_debug = reader.select_useful_sheets(
+                    source_doc.file_path,
+                )
+            except Exception as e:
+                logger.warning(
+                    "select_useful_sheets failed for %s: %s — falling back to single best sheet",
+                    source_doc.filename, e,
+                )
+                useful_sheets = []
+
+            if len(useful_sheets) <= 1:
+                result = extractor.safe_extract(
+                    source_doc.file_path,
+                    extract_all_sheets=False,
+                    preferred_sheet=preferred_sheet or (useful_sheets[0] if useful_sheets else None),
+                )
+            else:
+                logger.info(
+                    "Auto multi-sheet: extracting %d sheets for %s: %s",
+                    len(useful_sheets), source_doc.filename, useful_sheets,
+                )
+                sheet_names = list(useful_sheets)
+                if preferred_sheet and preferred_sheet in sheet_names:
+                    sheet_names = [preferred_sheet] + [s for s in sheet_names if s != preferred_sheet]
+                result = extractor.safe_extract(
+                    source_doc.file_path,
+                    extract_all_sheets=True,
+                    preferred_sheet=preferred_sheet or useful_sheets[0],
+                    sheet_names=sheet_names,
+                )
+
+        # Final fallback (auto & all modes): if result has 0 rows,
+        # retry with ALL sheets (no filter) so nothing is lost.
+        if extract_mode != "single":
+            payload = result.extracted if isinstance(result.extracted, dict) else {}
+            rows = payload.get("data") if isinstance(payload, dict) else None
+            if (isinstance(rows, list) and len(rows) == 0) or rows is None:
+                logger.info("Excel 0-row retry with extract_all_sheets=True (no filter) for %s", source_doc.filename)
                 retry = extractor.safe_extract(
                     source_doc.file_path,
                     extract_all_sheets=True,
-                    preferred_sheet=excel_sheet,
+                    preferred_sheet=None,
                 )
                 retry_payload = retry.extracted if isinstance(retry.extracted, dict) else {}
                 retry_rows = retry_payload.get("data") if isinstance(retry_payload, dict) else None

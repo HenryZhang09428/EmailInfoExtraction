@@ -1,12 +1,83 @@
+# =========================
+# Profile 配置文件（中文注释版）
+# =========================
+#
+# 作用：
+# - 定义一次处理任务的“业务配置”
+# - 覆盖默认模板/字段映射/关键词等硬编码
+# - 供 CLI 的 --profile-path 或 API 的 profile_path 使用
+#
+# 说明：
+# - 本文件是 YAML，注释使用 "#"
+# - 路径支持相对路径（相对于项目根目录）或绝对路径
+# - 未配置的项会回退到程序默认值
+
+
+# profile_id: 配置标识（仅用于标记/调试，不参与核心计算）
+# 建议：不同客户或不同业务场景使用不同 profile_id
 profile_id: "ss_profile_v1"
 
+
+# excel: Excel 读取相关配置
 excel:
+  # sheet: 优先处理的工作表名称
+  # - "auto": 自动选表（推荐通用场景）
+  # - 具体名称: 强制优先该 sheet（例如：人员参保登记报盘模版）
   sheet: "人员参保登记报盘模版"
 
+  # extract_mode: 多工作表抽取模式
+  # - "auto"  : （默认）智能自动——扫描所有 sheet，有 ≥2 个有效 sheet 时合并抽取，
+  #              否则只抽最佳 sheet；0 行结果时兜底重试全部 sheet
+  # - "single": 仅抽取单个 sheet（最佳或 sheet 字段指定的那张）
+  # - "all"   : 始终抽取所有 sheet 并合并
+  extract_mode: "auto"
+
+
+# templates: 模板任务列表（可配置多个任务）
+# 每个任务会生成一个独立的填充输出文件
 templates:
-  - key: "add"
+  - # key: 任务唯一键（用于结果 fills 字段的 key）
+    key: "add"
+
+    # template_path: 模板文件路径（xlsx）
+    # 可写相对路径（相对项目根）或绝对路径
     template_path: "app/templates/目标1模版：社保增员表.xlsx"
-    fill_columns: [“A","B","C","D"]
+
+    # output_name: 该模板任务的输出文件名
+    # 不填则默认：filled_{key}.xlsx
+    output_name: "filled_add.xlsx"
+
+    # max_sources: 社保模板场景下，最多使用多少个来源 source 参与填充
+    # 作用：控制多来源混合程度，避免引入不相关来源
+    # 建议：1~3（常用 2）
+    max_sources: 2
+
+    # fill_columns: 允许写入的 Excel 列字母白名单
+    # 仅这些列会被填充，其它列映射会被过滤掉
+    # 示例：["A", "B", "C", "D"]
+    fill_columns: ["A", "B", "C", "D"]
+
+    # special_field_to_column: 强制字段 -> 列字母映射（优先级高）
+    # 用于把“同义字段”固定写入目标列，避免模型映射漂移
+    # 示例：把“证件号码/身份证号码”都固定写入 B 列
     special_field_to_column:
       证件号码: "B"
       身份证号码: "B"
+
+
+# insurance: 社保/增减员业务规则覆盖（可选）
+insurance:
+  # add_keywords: 判定“增员意图”的关键词列表
+  # 用于模板意图识别、记录筛选与源选择评分
+  add_keywords: ["增员", "增加", "入职", "新增", "add"]
+
+  # remove_keywords: 判定“减员意图”的关键词列表
+  # 用于模板意图识别、记录筛选与源选择评分
+  remove_keywords: ["减员", "减少", "离职", "删除", "remove", "停保"]
+
+  # header_force_map: 表头强制语义映射（表头文本 -> 语义键）
+  # 用于覆盖/补充系统内置强制映射，提升不同模板兼容性
+  # 常见语义键示例：id_number, name, start_date, termination_date ...
+  header_force_map:
+    身份证号码: "id_number"
+    证件号码: "id_number"

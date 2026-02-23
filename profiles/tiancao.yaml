@@ -1,0 +1,36 @@
+# =========================
+# 天草 - Profile 配置
+# =========================
+#
+# 特征（基于现有回归样本）：
+# - 主要来源是多 sheet 的 Excel（.xls/.xlsx）
+#
+
+profile_id: "tiancao_profile_v1"
+
+router:
+  # 天草场景通常只需要 Excel；其它类型文件直接跳过，避免噪音与额外开销
+  allowed_source_types: ["excel"]
+  allowed_extensions: [".xls", ".xlsx"]
+  ignore_unknown_extensions: true
+
+excel:
+  sheet: "auto"
+
+templates:
+  - key: "add"
+    template_path: "app/templates/目标1模版：社保增员表.xlsx"
+    output_name: "filled_add.xlsx"
+    max_sources: 2
+    fill_columns: ["A", "B", "C", "D"]
+    special_field_to_column:
+      证件号码: "B"
+      身份证号码: "B"
+
+insurance:
+  add_keywords: ["增员", "增加", "入职", "新增", "add"]
+  remove_keywords: ["减员", "减少", "离职", "删除", "remove", "停保"]
+  header_force_map:
+    身份证号码: "id_number"
+    证件号码: "id_number"
+

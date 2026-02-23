@@ -1,0 +1,37 @@
+# =========================
+# 楚天龙 - Profile 配置
+# =========================
+#
+# 特征（基于现有回归样本）：
+# - 输入常见为邮件（.eml）+ 邮件附件里的 Excel（.xls/.xlsx）
+# - 为了降低无关衍生文件（例如内联图片）的开销，这里默认只允许 email/excel
+#
+
+profile_id: "chutianlong_profile_v1"
+
+router:
+  allowed_source_types: ["email", "excel"]
+  allowed_extensions: [".eml", ".docx", ".txt", ".xls", ".xlsx"]
+  ignore_unknown_extensions: true
+
+excel:
+  # 常见目标 sheet 名（留空/auto 表示完全自动；写死则用于“优先选表”）
+  sheet: "人员参保登记报盘模板"
+
+templates:
+  - key: "add"
+    template_path: "app/templates/目标1模版：社保增员表.xlsx"
+    output_name: "filled_add.xlsx"
+    max_sources: 2
+    fill_columns: ["A", "B", "C", "D"]
+    special_field_to_column:
+      证件号码: "B"
+      身份证号码: "B"
+
+insurance:
+  add_keywords: ["增员", "增加", "入职", "新增", "add"]
+  remove_keywords: ["减员", "减少", "离职", "删除", "remove", "停保"]
+  header_force_map:
+    身份证号码: "id_number"
+    证件号码: "id_number"
+

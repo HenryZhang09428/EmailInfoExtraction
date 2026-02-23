@@ -1,4 +1,7 @@
 """
+Excel 提取器模块 (Excel Extractor Module)
+=========================================
+
 ExcelExtractor：Excel 文件抽取的高层编排器。
 
 整体流程（从文件到结构化输出）：
@@ -20,6 +23,7 @@ Reader → HeaderDetector → SchemaMapper → DataCleaner → SourceDoc
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -261,13 +265,19 @@ class ExcelExtractor(BaseExtractor):
     - `DataCleaner`：值归一化与表头规范化
     """
 
-    def __init__(self, llm: LLMClient, prompts: Optional[dict] = None):
+    def __init__(
+        self,
+        llm: LLMClient,
+        prompts: Optional[dict] = None,
+        header_force_map: Optional[Dict[str, str]] = None,
+    ):
         super().__init__(llm, prompts)
         self._cfg = DEFAULT_CONFIG
         self._cleaner = DataCleaner()
         self._header = HeaderDetector(self._cfg)
         self._reader = ExcelReader(self._cfg, self._header)
         self._mapper = SchemaMapper(self._cfg)
+        self._header_force_map = header_force_map if isinstance(header_force_map, dict) else {}
 
     # ------------------------------------------------------------------
     # 对外接口（保持稳定）
@@ -278,6 +288,7 @@ class ExcelExtractor(BaseExtractor):
         file_path: str,
         extract_all_sheets: bool = False,
         preferred_sheet: Optional[str] = None,
+        sheet_names: Optional[List[str]] = None,
     ) -> SourceDoc:
         """
         安全抽取入口：捕获内部异常，保证始终返回 `SourceDoc`。
@@ -286,9 +297,15 @@ class ExcelExtractor(BaseExtractor):
         - file_path：Excel 文件路径
         - extract_all_sheets：是否抽取所有工作表并合并到一个结果中
         - preferred_sheet：指定优先抽取的工作表名称（找不到会回退到自动选表）
+        - sheet_names：当 `extract_all_sheets=True` 时，可指定要遍历的工作表名称列表（用于过滤无用 sheet 或 Top-K 选择）
         """
         try:
-            return self.extract(file_path, extract_all_sheets=extract_all_sheets, preferred_sheet=preferred_sheet)
+            return self.extract(
+                file_path,
+                extract_all_sheets=extract_all_sheets,
+                preferred_sheet=preferred_sheet,
+                sheet_names=sheet_names,
+            )
         except Exception as e:
             logger.error("Extraction failed for %s: %s", file_path, e, exc_info=True)
             return self._create_error_source_doc(file_path, e)
@@ -298,6 +315,7 @@ class ExcelExtractor(BaseExtractor):
         file_path: str,
         extract_all_sheets: bool = False,
         preferred_sheet: Optional[str] = None,
+        sheet_names: Optional[List[str]] = None,
     ) -> SourceDoc:
         """
         抽取 Excel 文件内容并返回 `SourceDoc`。
@@ -305,6 +323,7 @@ class ExcelExtractor(BaseExtractor):
         行为说明：
         - 默认只抽取“最佳工作表”（由 `ExcelReader.choose_best_sheet()` 决定）；
         - 当 `extract_all_sheets=True` 时，会遍历所有工作表并合并记录（受最大记录数限制）。
+          - 若传入 `sheet_names`，则只遍历该列表中的工作表（可用于过滤无用 sheet 或 Top-K 选择）。
 
         返回结果包含：
         - `TABLE_CSV`：抽样的逗号分隔文本（用于调试/可观测，可能为空）
@@ -319,18 +338,40 @@ class ExcelExtractor(BaseExtractor):
         if sheet_debug.get("profile_sheet_not_found"):
             top_warnings.append("sheet_not_found_fallback_to_auto")
 
-        sheet_names: Optional[List[str]] = None
+        # Resolve which sheets to iterate when extract_all_sheets is requested.
+        resolved_sheet_names: Optional[List[str]] = None
         if extract_all_sheets:
-            try:
-                sheet_names, _ = self._reader.list_sheet_names(file_path)
-            except Exception as e:
-                top_warnings.append(f"sheet_names_read_failed: {e}")
-            if not sheet_names:
+            # Callers may provide an explicit sheet list (e.g., from
+            # select_useful_sheets); otherwise fall back to all sheets.
+            provided = [
+                str(s).strip()
+                for s in (sheet_names or [])
+                if isinstance(s, (str, int, float)) and str(s).strip()
+            ]
+            if provided:
+                # Validate against actual workbook sheet names.
+                try:
+                    actual_names, _backend = self._reader.list_sheet_names(file_path)
+                    actual_set = set(actual_names or [])
+                    filtered = [sn for sn in provided if sn in actual_set]
+                    missing = [sn for sn in provided if sn not in actual_set]
+                    if missing:
+                        top_warnings.append(f"sheet_names_filtered_missing: {missing[:10]}")
+                    resolved_sheet_names = filtered
+                except Exception as e:
+                    top_warnings.append(f"sheet_names_read_failed: {e}")
+                    resolved_sheet_names = provided
+            else:
+                try:
+                    resolved_sheet_names, _ = self._reader.list_sheet_names(file_path)
+                except Exception as e:
+                    top_warnings.append(f"sheet_names_read_failed: {e}")
+            if not resolved_sheet_names:
                 extract_all_sheets = False
 
         if not extract_all_sheets:
             return self._single_sheet(file_path, selected_sheet, filename, source_id, sheet_debug, top_warnings)
-        return self._all_sheets(file_path, sheet_names, selected_sheet, filename, source_id, sheet_debug, top_warnings)
+        return self._all_sheets(file_path, resolved_sheet_names, selected_sheet, filename, source_id, sheet_debug, top_warnings)
 
     # ------------------------------------------------------------------
     # 单工作表路径
@@ -415,9 +456,13 @@ class ExcelExtractor(BaseExtractor):
             data = s_ext.get("data")
             sheet_count = 0
             skipped = 0
+            filtered_demo_records_count = 0
             if isinstance(data, list):
                 for rec in data:
                     if not isinstance(rec, dict):
+                        continue
+                    if self._should_filter_demo_record(str(sn), rec):
+                        filtered_demo_records_count += 1
                         continue
                     total_seen += 1
                     if cfg.max_records_per_workbook and len(combined) >= cfg.max_records_per_workbook:
@@ -461,6 +506,7 @@ class ExcelExtractor(BaseExtractor):
                 "records_count": sheet_count,
                 "read_backend": (s_meta or {}).get("read_backend"),
                 "no_records_reason": no_reason,
+                "filtered_demo_records_count": filtered_demo_records_count,
             }
             combined_warnings.extend(s_warn)
             sheet_summaries.append(s_sum)
@@ -636,8 +682,13 @@ class ExcelExtractor(BaseExtractor):
             coverage = mapper.compute_coverage(sem_map, hpaths)
 
         sem_map = mapper.resolve_conflicts(sem_map, hpaths, warnings)
-        hpaths, sem_map = mapper.apply_forced_mappings(hpaths, sem_map)
+        hpaths, sem_map = mapper.apply_forced_mappings(
+            hpaths,
+            sem_map,
+            extra_force_map=self._header_force_map,
+        )
         sem_map = mapper.ensure_termination_reason(df, hpaths, sem_map, ds, sheet_name, cfg.max_rows_to_process)
+        sem_map = self._sanitize_boolean_id_check_columns(df, hpaths, sem_map, ds, cfg.max_rows_to_process, warnings)
 
         # ---- 4）覆盖率过低则提前返回：避免生成大量“无键/错键”记录 ----
         if coverage < cfg.schema_infer_coverage_threshold:
@@ -657,6 +708,7 @@ class ExcelExtractor(BaseExtractor):
 
         # ---- 5）生成记录：按语义键映射逐行抽取，并应用行过滤规则 ----
         sem_keys = mapper.build_semantic_keys(hpaths, sem_map, warnings)
+        sem_keys = self._stabilize_grouped_semantic_keys(sem_keys, h1, h2, hpaths, sheet_name, warnings)
         logger.info(
             "Excel mode=%s | filename=%s | source_id=%s | rows=%d | cols=%d | coverage=%.3f",
             "fallback" if fallback_used else "schema_infer",
@@ -679,7 +731,13 @@ class ExcelExtractor(BaseExtractor):
                 if sk:
                     rec[sk] = DataCleaner.normalize_value(df.iat[ri, ci])
             if row_filter and not _apply_row_filter(rec, row_vals, row_filter):
-                continue
+                # Guard: avoid dropping real first rows right below header
+                # when LLM row_filter is too aggressive (e.g. "合计" token appears in tail cells).
+                if ri < ds + 3 and self._is_strong_early_record_candidate(rec):
+                    if "row_filter_bypass_for_early_strong_record" not in warnings:
+                        warnings.append("row_filter_bypass_for_early_strong_record")
+                else:
+                    continue
             if rec:
                 rec["__source_file__"] = filename
                 if add_sheet_name:
@@ -714,6 +772,162 @@ class ExcelExtractor(BaseExtractor):
     # ------------------------------------------------------------------
     # 辅助函数
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _is_demo_sheet_name(sheet_name: str) -> bool:
+        sn = str(sheet_name or "").strip().lower()
+        return any(k in sn for k in ("示例", "样例", "example", "demo"))
+
+    @staticmethod
+    def _record_has_demo_placeholder(rec: Dict[str, Any]) -> bool:
+        marker_tokens = ("****", "xxx", "测试", "sample", "demo")
+        id_number = str(rec.get("id_number", "") or "")
+        if "*" in id_number:
+            return True
+        for v in rec.values():
+            text = str(v or "").strip().lower()
+            if not text:
+                continue
+            if any(tok in text for tok in marker_tokens):
+                return True
+        return False
+
+    @classmethod
+    def _should_filter_demo_record(cls, sheet_name: str, rec: Dict[str, Any]) -> bool:
+        if not cls._is_demo_sheet_name(sheet_name):
+            return False
+        return cls._record_has_demo_placeholder(rec)
+
+    @staticmethod
+    def _is_strong_early_record_candidate(rec: Dict[str, Any]) -> bool:
+        name = DataCleaner.cell_to_str(rec.get("name", ""))
+        if len(name) < 2:
+            return False
+        for key in ("id_number", "employee_id"):
+            value = DataCleaner.cell_to_str(rec.get(key, "")).replace(" ", "")
+            if len(value) >= 15 and all(ch.isdigit() or ch in ("X", "x") for ch in value):
+                return True
+        return False
+
+    @staticmethod
+    def _is_boolean_check_value(value: str) -> bool:
+        v = str(value or "").strip().lower()
+        return v in {"true", "false", "是", "否", "通过", "不通过", "y", "n", "yes", "no", "1", "0"}
+
+    @staticmethod
+    def _infer_group_tag(*texts: Any) -> str:
+        merged = DataCleaner.normalize_header_compact(" ".join(str(t or "") for t in texts))
+        if any(k in merged for k in ("公积金", "住房公积金", "公积")):
+            return "hf"
+        if any(k in merged for k in ("社保", "社会保险")):
+            return "ss"
+        if any(k in merged for k in ("医保", "医疗")):
+            return "med"
+        return ""
+
+    @classmethod
+    def _stabilize_grouped_semantic_keys(
+        cls,
+        sem_keys: List[str],
+        h1: List[Any],
+        h2: List[Any],
+        hpaths: List[str],
+        sheet_name: Any,
+        warnings: List[str],
+    ) -> List[str]:
+        keys = list(sem_keys or [])
+        if not keys:
+            return keys
+
+        amount_map = {"ss": "ss_base", "hf": "hf_base", "med": "med_base"}
+        end_map = {"ss": "ss_end_month", "hf": "hf_end_month", "med": "med_end_month"}
+        changed = False
+        used = set(k for k in keys if k)
+
+        for ci, key in enumerate(keys):
+            if not key:
+                continue
+            base = re.sub(r"__\d+$", "", key)
+            if base not in {"amount", "end_date"}:
+                continue
+            group = cls._infer_group_tag(
+                hpaths[ci] if ci < len(hpaths) else "",
+                h1[ci] if ci < len(h1) else "",
+                h2[ci] if ci < len(h2) else "",
+            )
+            if not group:
+                continue
+            target = amount_map.get(group) if base == "amount" else end_map.get(group)
+            if not target:
+                continue
+            if target in used and target != key:
+                continue
+            used.discard(key)
+            keys[ci] = target
+            used.add(target)
+            changed = True
+
+        # Minimal fallback for remove-intent sheets when group tags are weak:
+        # split first two duplicate amount/end_date columns into SS/HF by order.
+        is_remove_like = any(k in DataCleaner.normalize_header_compact(sheet_name) for k in ("减员", "离职", "停保"))
+        if is_remove_like:
+            amount_idx = [i for i, k in enumerate(keys) if re.sub(r"__\d+$", "", k) == "amount"]
+            end_idx = [i for i, k in enumerate(keys) if re.sub(r"__\d+$", "", k) == "end_date"]
+            if len(amount_idx) >= 2:
+                keys[amount_idx[0]] = "ss_base"
+                keys[amount_idx[1]] = "hf_base"
+                changed = True
+            if len(end_idx) >= 2:
+                keys[end_idx[0]] = "ss_end_month"
+                keys[end_idx[1]] = "hf_end_month"
+                changed = True
+
+        if changed and "semantic_group_split_applied" not in warnings:
+            warnings.append("semantic_group_split_applied")
+        return keys
+
+    @classmethod
+    def _sanitize_boolean_id_check_columns(
+        cls,
+        df: pd.DataFrame,
+        header_paths: List[str],
+        mapping: Dict[str, str],
+        data_start_idx: int,
+        max_rows: int,
+        warnings: List[str],
+    ) -> Dict[str, str]:
+        updated = dict(mapping or {})
+        has_real_id_column = any(
+            (k or "").strip() in {"id_number", "employee_id"} for k in updated.values()
+        )
+        if not has_real_id_column:
+            return updated
+
+        end = min(len(df), data_start_idx + max_rows)
+        warned = False
+        for ci, hp in enumerate(header_paths):
+            header_text = str(hp or "")
+            mapped = (updated.get(hp) or "").strip()
+            if mapped not in {"id_number", "id_card", "employee_id", ""}:
+                continue
+            if "身份证" not in header_text and "身份证" not in DataCleaner.normalize_header_compact(header_text):
+                continue
+
+            values = [
+                DataCleaner.cell_to_str(df.iat[r, ci])
+                for r in range(data_start_idx, end)
+                if DataCleaner.cell_to_str(df.iat[r, ci]) != ""
+            ]
+            if not values:
+                continue
+
+            bool_like_ratio = sum(1 for v in values if cls._is_boolean_check_value(v)) / max(1, len(values))
+            if bool_like_ratio >= 0.7:
+                updated[hp] = "id_check_passed"
+                if not warned:
+                    warnings.append("boolean_id_check_column_skipped")
+                    warned = True
+        return updated
 
     @staticmethod
     def _build_extracted(

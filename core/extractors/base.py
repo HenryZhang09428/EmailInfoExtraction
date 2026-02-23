@@ -1,5 +1,8 @@
 """
-Base extractor class providing a standard interface and error handling for all extractors.
+提取器基类模块 (Base Extractor Module)
+=====================================
+
+为所有提取器提供统一接口和错误处理。
 """
 import uuid
 import os
@@ -16,20 +19,20 @@ logger = get_logger(__name__)
 
 class BaseExtractor(ABC):
     """
-    Abstract base class for all extractors.
-    
-    Provides a standard interface with:
-    - extract(): Abstract method that subclasses must implement
-    - safe_extract(): Wrapper that catches exceptions and returns an error SourceDoc
+    所有提取器的抽象基类。
+
+    提供标准接口:
+    - extract(): 抽象方法，子类必须实现
+    - safe_extract(): 包装方法，捕获异常并返回错误 SourceDoc
     """
     
     def __init__(self, llm: LLMClient, prompts: Optional[dict] = None):
         """
-        Initialize the extractor.
-        
-        Args:
-            llm: The LLM client for AI-powered extraction.
-            prompts: Dictionary of prompts for extraction. Optional.
+        初始化提取器。
+
+        参数:
+            llm: 用于 AI 提取的 LLM 客户端
+            prompts: 提取用提示词字典，可选
         """
         self.llm = llm
         self.prompts = prompts or {}
@@ -38,32 +41,30 @@ class BaseExtractor(ABC):
     @abstractmethod
     def extract(self, file_path: str) -> SourceDoc:
         """
-        Extract content from a file and return a SourceDoc.
-        
-        Args:
-            file_path: Path to the file to extract.
-        
-        Returns:
-            SourceDoc with extracted content.
-        
-        Raises:
-            Exception: If extraction fails (caught by safe_extract).
+        从文件提取内容并返回 SourceDoc。
+
+        参数:
+            file_path: 待提取文件路径
+
+        返回:
+            包含提取内容的 SourceDoc
+
+        抛出:
+            Exception: 提取失败时（由 safe_extract 捕获）
         """
         pass
     
     def safe_extract(self, file_path: str) -> SourceDoc:
         """
-        Safely extract content from a file, catching any exceptions.
-        
-        This method wraps extract() in a try/except block to prevent
-        pipeline crashes. On failure, it logs the error and returns
-        a standardized error SourceDoc.
-        
-        Args:
-            file_path: Path to the file to extract.
-        
-        Returns:
-            SourceDoc with extracted content, or an error SourceDoc on failure.
+        安全提取：捕获异常，防止流水线崩溃。
+
+        失败时记录错误并返回标准化的错误 SourceDoc。
+
+        参数:
+            file_path: 待提取文件路径
+
+        返回:
+            成功时返回包含内容的 SourceDoc，失败时返回错误 SourceDoc
         """
         try:
             result = self.extract(file_path)
@@ -74,14 +75,14 @@ class BaseExtractor(ABC):
     
     def _create_error_source_doc(self, file_path: str, error: Exception) -> SourceDoc:
         """
-        Create a standardized error SourceDoc.
-        
-        Args:
-            file_path: Path to the file that failed extraction.
-            error: The exception that occurred.
-        
-        Returns:
-            SourceDoc with error information.
+        创建标准化的错误 SourceDoc。
+
+        参数:
+            file_path: 提取失败的文件路径
+            error: 发生的异常
+
+        返回:
+            包含错误信息的 SourceDoc
         """
         filename = Path(file_path).name if file_path else "unknown"
         source_id = str(uuid.uuid4())
@@ -111,13 +112,13 @@ class BaseExtractor(ABC):
     
     def get_derived_files(self) -> List[str]:
         """
-        Get the list of derived files (e.g., email attachments) from the last extraction.
-        
-        Returns:
-            List of file paths for derived files.
+        获取上次提取产生的衍生文件列表（如邮件附件）。
+
+        返回:
+            衍生文件路径列表
         """
         return self.derived_files
     
     def clear_derived_files(self) -> None:
-        """Clear the list of derived files."""
+        """清空衍生文件列表。"""
         self.derived_files = []
