@@ -70,6 +70,25 @@ def ensure_output_dir(output_dir: str) -> Path:
     return output_path
 
 
+def _load_template_registry_overrides(registry_source: str) -> Optional[Dict[str, Any]]:
+    path = Path(registry_source).expanduser()
+    if not path.is_absolute():
+        path = (REPO_ROOT / path).resolve()
+    if not path.exists() or not path.is_file():
+        return None
+    try:
+        if path.suffix.lower() == ".json":
+            data = json.loads(path.read_text(encoding="utf-8"))
+        else:
+            import yaml  # Local import keeps YAML optional for runtime.
+
+            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        logger.warning("Failed loading template registry source %s: %s", path, exc)
+        return None
+    return data if isinstance(data, dict) else None
+
+
 def _build_source_dict(source: Any) -> Dict[str, Any]:
     """将 SourceDoc 转为可序列化的字典。"""
     return {
@@ -293,11 +312,38 @@ def process_files(
                 else f"filled_{key}.xlsx"
             )
             max_sources = job.get("max_sources") if isinstance(job.get("max_sources"), int) else None
+            template_key = job.get("template_key") if isinstance(job.get("template_key"), str) else None
+            strategy_key = job.get("strategy_key") if isinstance(job.get("strategy_key"), str) else None
+            strategy_plugin = job.get("strategy_plugin") if isinstance(job.get("strategy_plugin"), str) else None
+            registry_source = job.get("registry_source") if isinstance(job.get("registry_source"), str) else None
+            mapping_constraints = (
+                job.get("mapping_constraints")
+                if isinstance(job.get("mapping_constraints"), dict)
+                else None
+            )
             planner_options: Dict[str, Any] = {}
             if insurance_options:
                 planner_options["insurance"] = dict(insurance_options)
             if max_sources is not None:
                 planner_options.setdefault("insurance", {})["max_sources"] = max_sources
+            template_opts: Dict[str, Any] = {}
+            if template_key and template_key.strip():
+                template_opts["template_key"] = template_key.strip()
+            if strategy_key and strategy_key.strip():
+                template_opts["strategy_key"] = strategy_key.strip()
+            if strategy_plugin and strategy_plugin.strip():
+                template_opts["strategy_plugin"] = strategy_plugin.strip()
+            if registry_source and registry_source.strip():
+                template_opts["registry_source"] = registry_source.strip()
+            if mapping_constraints:
+                template_opts["mapping_constraints"] = dict(mapping_constraints)
+            if registry_source and registry_source.strip():
+                registry = _load_template_registry_overrides(registry_source.strip())
+                if registry:
+                    template_opts["registry"] = registry
+            if template_opts:
+                template_opts["template_filename"] = template_path.name
+                planner_options["template"] = template_opts
 
             def _postprocess(fill_plan_dict: dict) -> dict:
                 return apply_fill_plan_overrides(

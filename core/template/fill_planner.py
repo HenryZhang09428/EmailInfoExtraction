@@ -88,6 +88,7 @@ from core.ir import FillPlan, FillPlanTarget
 from core.llm import LLMClient
 from core.logger import get_logger
 from core.template.schema import TemplateSchema
+from core.template.template_registry import resolve_strategy
 
 logger = get_logger(__name__)
 
@@ -119,7 +120,32 @@ def plan_fill(
     extracted_json = extracted if isinstance(extracted, (dict, list)) else {"data": extracted}
     logic = InsuranceBusinessLogic(cfg)
 
-    # 从文件名推断意图
+    strategy_resolution = resolve_strategy(
+        template_schema=template_schema,
+        template_filename=template_filename,
+        planner_options=planner_options,
+        require_llm=require_llm,
+    )
+    if strategy_resolution.strategy is not None:
+        try:
+            planned = strategy_resolution.strategy(
+                template_schema,
+                extracted_json if isinstance(extracted_json, dict) else {"data": extracted_json},
+                llm,
+                template_filename,
+                strategy_resolution.context,
+            )
+            if isinstance(planned, FillPlan):
+                dbg = dict(planned.debug or {})
+                dbg["strategy_key"] = strategy_resolution.context.strategy_key
+                dbg["template_key"] = strategy_resolution.context.template_key
+                dbg["strategy_routed"] = True
+                planned.debug = dbg
+                return planned
+        except Exception as exc:
+            logger.warning("Template strategy failed, fallback to legacy routing: %s", exc)
+
+    # 从文件名推断意图（legacy 路由）
     template_intent = logic.infer_intent_from_filename(template_filename or "")
     if not template_intent:
         return FillPlan(target=FillPlanTarget(), warnings=["insurance_intent_unknown"], llm_used=False)

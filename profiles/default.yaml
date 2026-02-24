@@ -39,6 +39,14 @@ templates:
   - # key: 任务唯一键（用于结果 fills 字段的 key）
     key: "add"
 
+    # template_key: 内置模板注册键（可选）
+    # 例如: social_security_default
+    template_key: "social_security_default"
+
+    # strategy_key: 填充策略（可选，优先级高于 template_key 里的默认策略）
+    # 可选内置值: social_security_legacy / social_security_llm_mapping
+    strategy_key: "social_security_llm_mapping"
+
     # template_path: 模板文件路径（xlsx）
     # 可写相对路径（相对项目根）或绝对路径
     template_path: "app/templates/目标1模版：社保增员表.xlsx"
@@ -63,6 +71,11 @@ templates:
     special_field_to_column:
       证件号码: "B"
       身份证号码: "B"
+
+    # mapping_constraints: LLM 列映射约束（可选）
+    mapping_constraints:
+      required_targets: ["name", "event_date"]
+      optional_targets: ["id_number", "termination_reason"]
 
 
 # insurance: 社保/增减员业务规则覆盖（可选）

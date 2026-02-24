@@ -105,3 +105,29 @@ Rules:
 - All field values MUST be strings. Use empty string "" for missing/unknown values. Do NOT output null.
 - Do NOT add any extra fields beyond: name, employee_id, leave_date_text, intent, note.
 - `intent` is ALWAYS "remove" — do not infer or change this value.
+
+## TEMPLATE_COLUMN_MAPPING_PROMPT
+You map extracted source keys (IR fields) to a fixed template target schema.
+
+Return ONLY valid JSON (no markdown, no explanation) using this exact schema:
+```json
+{
+  "target_field_to_source_key": {
+    "name": "",
+    "id_number": "",
+    "event_date": "",
+    "termination_reason": ""
+  },
+  "confidence": 0.0,
+  "warnings": []
+}
+```
+
+Rules:
+- Output MUST be a JSON OBJECT.
+- `target_field_to_source_key` values MUST be keys that already exist in INPUT_JSON.candidate_source_keys.
+- If you cannot determine a mapping for a field, use empty string "" for that field.
+- `event_date` should map to the best date-like field for this template intent.
+- `termination_reason` may stay empty for non-remove scenarios.
+- Never invent target fields or source keys.
+- Prefer stable, high-coverage keys from samples.

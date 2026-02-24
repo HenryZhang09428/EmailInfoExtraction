@@ -131,6 +131,21 @@ def load_profile(profile_path: str) -> dict:
         max_sources = item.get("max_sources")
         if not isinstance(max_sources, int) or max_sources <= 0:
             max_sources = None
+        template_key = item.get("template_key")
+        if not isinstance(template_key, str) or not template_key.strip():
+            template_key = None
+        strategy_key = item.get("strategy_key")
+        if not isinstance(strategy_key, str) or not strategy_key.strip():
+            strategy_key = None
+        strategy_plugin = item.get("strategy_plugin")
+        if not isinstance(strategy_plugin, str) or not strategy_plugin.strip():
+            strategy_plugin = None
+        registry_source = item.get("registry_source")
+        if not isinstance(registry_source, str) or not registry_source.strip():
+            registry_source = None
+        mapping_constraints = item.get("mapping_constraints")
+        if not isinstance(mapping_constraints, dict):
+            mapping_constraints = None
         templates.append(
             {
                 "key": key,
@@ -139,6 +154,11 @@ def load_profile(profile_path: str) -> dict:
                 "special_field_to_column": special_field_to_column,
                 "output_name": output_name,
                 "max_sources": max_sources,
+                "template_key": template_key,
+                "strategy_key": strategy_key,
+                "strategy_plugin": strategy_plugin,
+                "registry_source": registry_source,
+                "mapping_constraints": mapping_constraints,
             }
         )
 

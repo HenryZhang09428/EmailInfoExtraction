@@ -7,6 +7,7 @@
 检测包含 姓名、证件号码、申报类型、费用年月 等表头的模板，
 构建仅填充特定列的约束性填充计划。
 """
+import json
 import re
 from datetime import datetime, date
 from typing import Any, Dict, List, Optional, Tuple
@@ -17,6 +18,7 @@ from core.template.schema import TemplateSchema
 from core.ir import FillPlan, FillPlanTarget
 from core.llm import LLMClient
 from core.logger import get_logger
+from core.prompts_loader import get_prompts
 
 logger = get_logger(__name__)
 
@@ -1094,9 +1096,143 @@ def _select_sources_for_template(
     return selected_sources, selected_scores, warnings
 
 
+def _collect_candidate_source_keys(sources: List[Dict[str, Any]]) -> List[str]:
+    seen = set()
+    keys: List[str] = []
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        extracted = source.get("extracted")
+        if not isinstance(extracted, dict):
+            continue
+        data = extracted.get("data")
+        if not isinstance(data, list):
+            continue
+        for item in data[:30]:
+            if not isinstance(item, dict):
+                continue
+            for key in item.keys():
+                if isinstance(key, str) and key not in seen:
+                    seen.add(key)
+                    keys.append(key)
+    return keys
+
+
+def _collect_sample_records_for_mapping(sources: List[Dict[str, Any]], limit: int = 20) -> List[Dict[str, Any]]:
+    samples: List[Dict[str, Any]] = []
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        extracted = source.get("extracted")
+        if not isinstance(extracted, dict):
+            continue
+        data = extracted.get("data")
+        if not isinstance(data, list):
+            continue
+        for item in data:
+            if isinstance(item, dict):
+                samples.append(dict(item))
+            if len(samples) >= limit:
+                return samples
+    return samples
+
+
+def _llm_infer_source_key_mapping(
+    llm: LLMClient,
+    selected_sources: List[Dict[str, Any]],
+    profile: SocialSecurityProfile,
+    template_intent: str,
+) -> Tuple[Dict[str, str], List[str], Dict[str, Any]]:
+    warnings: List[str] = []
+    debug: Dict[str, Any] = {"enabled": True}
+    prompts = get_prompts()
+    prompt_tpl = str((prompts or {}).get("TEMPLATE_COLUMN_MAPPING_PROMPT", "") or "").strip()
+    if not prompt_tpl:
+        warnings.append("llm_mapping_prompt_missing:TEMPLATE_COLUMN_MAPPING_PROMPT")
+        debug["llm_called"] = False
+        return {}, warnings, debug
+
+    candidate_keys = _collect_candidate_source_keys(selected_sources)
+    sample_records = _collect_sample_records_for_mapping(selected_sources)
+    if not candidate_keys:
+        warnings.append("llm_mapping_no_candidate_keys")
+        debug["llm_called"] = False
+        return {}, warnings, debug
+
+    payload = {
+        "intent": template_intent,
+        "target_fields": ["name", "id_number", "event_date", "termination_reason"],
+        "candidate_source_keys": candidate_keys,
+        "template_columns": {
+            "name_columns": profile.name_columns,
+            "id_columns": profile.id_columns,
+            "declare_type_columns": profile.declare_type_columns,
+            "fee_month_columns": profile.fee_month_columns,
+            "reason_columns": profile.reason_columns,
+        },
+        "sample_records": sample_records[:12],
+    }
+    prompt = f"{prompt_tpl}\n\nINPUT_JSON:\n{json.dumps(payload, ensure_ascii=False)}"
+    debug["candidate_key_count"] = len(candidate_keys)
+    debug["sample_record_count"] = len(sample_records[:12])
+    debug["llm_called"] = True
+
+    try:
+        if hasattr(llm, "chat_json_once"):
+            raw = llm.chat_json_once(
+                prompt,
+                system=None,
+                temperature=0,
+                timeout=30.0,
+                step="template_column_mapping_social_security",
+            )
+        else:
+            raw = llm.chat_json(
+                prompt,
+                system=None,
+                temperature=0,
+                step="template_column_mapping_social_security",
+            )
+    except Exception as exc:
+        warnings.append(f"llm_mapping_exception:{type(exc).__name__}")
+        debug["error"] = str(exc)[:200]
+        return {}, warnings, debug
+
+    mapping_obj = {}
+    confidence = None
+    if isinstance(raw, dict):
+        if isinstance(raw.get("target_field_to_source_key"), dict):
+            mapping_obj = raw.get("target_field_to_source_key") or {}
+        elif isinstance(raw.get("mapping"), dict):
+            mapping_obj = raw.get("mapping") or {}
+        confidence = raw.get("confidence")
+        llm_warnings = raw.get("warnings")
+        if isinstance(llm_warnings, list):
+            for w in llm_warnings:
+                if isinstance(w, str) and w.strip():
+                    warnings.append(f"llm_mapping:{w.strip()}")
+
+    valid_targets = {"name", "id_number", "event_date", "termination_reason"}
+    mapped: Dict[str, str] = {}
+    for target, source_key in mapping_obj.items():
+        if target not in valid_targets:
+            continue
+        if not isinstance(source_key, str) or not source_key.strip():
+            continue
+        if source_key not in candidate_keys:
+            warnings.append(f"llm_mapping_invalid_key:{target}->{source_key}")
+            continue
+        mapped[target] = source_key.strip()
+
+    debug["confidence"] = confidence if isinstance(confidence, (int, float)) else None
+    debug["mapped_targets"] = sorted(mapped.keys())
+    return mapped, warnings, debug
+
+
 def _extract_records_from_source(
     source: Dict[str, Any],
-    intent: str
+    intent: str,
+    mapping_hints: Optional[Dict[str, str]] = None,
 ) -> Tuple[List[Dict[str, Any]], List[str], Dict[str, Any]]:
     records: List[Dict[str, Any]] = []
     warnings: List[str] = []
@@ -1131,9 +1267,21 @@ def _extract_records_from_source(
     default_id_keys = ["id_number", "身份证号", "证件号码", "employee_id", "工号"]
     date_candidates = _date_candidates(intent)
     reason_candidates = _reason_candidates(intent)
-    
-    proposed_name_key = default_name_keys[0]
-    proposed_id_key = default_id_keys[0]
+    mapping_hints = mapping_hints or {}
+    llm_reason_key = mapping_hints.get("reason_key") if isinstance(mapping_hints.get("reason_key"), str) else None
+    if llm_reason_key and llm_reason_key not in reason_candidates:
+        reason_candidates = [llm_reason_key] + reason_candidates
+
+    proposed_name_key = (
+        mapping_hints.get("name_key")
+        if isinstance(mapping_hints.get("name_key"), str) and mapping_hints.get("name_key")
+        else default_name_keys[0]
+    )
+    proposed_id_key = (
+        mapping_hints.get("id_key")
+        if isinstance(mapping_hints.get("id_key"), str) and mapping_hints.get("id_key")
+        else default_id_keys[0]
+    )
     proposed_date_key = date_candidates[0] if date_candidates else ""
     
     for nk in default_name_keys:
@@ -1154,12 +1302,16 @@ def _extract_records_from_source(
             continue
         break
     
-    selected_date_key, date_key_reason = _select_date_key(data, intent)
-    if selected_date_key:
-        proposed_date_key = selected_date_key
+    llm_date_key = mapping_hints.get("date_key") if isinstance(mapping_hints.get("date_key"), str) else None
+    if llm_date_key and any(_get_record_value_by_key(item, llm_date_key) for item in data if isinstance(item, dict)):
+        proposed_date_key = llm_date_key
     else:
-        warnings.append(date_key_reason or "required_field_missing:离职日期")
-        return records, warnings, debug_info
+        selected_date_key, date_key_reason = _select_date_key(data, intent)
+        if selected_date_key:
+            proposed_date_key = selected_date_key
+        else:
+            warnings.append(date_key_reason or "required_field_missing:离职日期")
+            return records, warnings, debug_info
     
     validation = _validate_and_fix_field_mappings(
         data, proposed_name_key, proposed_id_key, proposed_date_key, intent
@@ -1445,6 +1597,7 @@ def build_social_security_fill_plan(
     profile: SocialSecurityProfile,
     template_intent: str,
     planner_options: Optional[Dict[str, Any]] = None,
+    use_llm_mapping: bool = False,
 ) -> FillPlan:
     debug_info: Dict[str, Any] = {
         "template_intent": template_intent,
@@ -1456,6 +1609,7 @@ def build_social_security_fill_plan(
         "fee_month_format": profile.fee_month_format,
     }
     warnings: List[str] = []
+    mapping_hints: Dict[str, str] = {}
     
     if not profile.is_detected:
         return FillPlan(
@@ -1495,6 +1649,26 @@ def build_social_security_fill_plan(
         max_sources=max_sources,
     )
     warnings.extend(selection_warnings)
+
+    template_options = planner_options.get("template") if isinstance(planner_options, dict) and isinstance(planner_options.get("template"), dict) else {}
+    if isinstance(template_options.get("use_llm_mapping"), bool):
+        use_llm_mapping = bool(template_options.get("use_llm_mapping"))
+    if use_llm_mapping and selected_sources:
+        mapped, llm_map_warnings, llm_map_debug = _llm_infer_source_key_mapping(
+            llm, selected_sources, profile, template_intent
+        )
+        warnings.extend(llm_map_warnings)
+        debug_info["llm_mapping"] = llm_map_debug
+        mapping_hints = {
+            "name_key": mapped.get("name", ""),
+            "id_key": mapped.get("id_number", ""),
+            "date_key": mapped.get("event_date", ""),
+            "reason_key": mapped.get("termination_reason", ""),
+        }
+        if not any(v for v in mapping_hints.values()):
+            warnings.append("llm_mapping_fallback_to_heuristics")
+    else:
+        debug_info["llm_mapping"] = {"enabled": False}
     
     debug_info["source_selection"] = {
         "selected_count": len(selected_sources),
@@ -1519,7 +1693,9 @@ def build_social_security_fill_plan(
     
     all_records: List[Dict[str, Any]] = []
     for source in selected_sources:
-        source_records, extract_warnings, extract_debug = _extract_records_from_source(source, template_intent)
+        source_records, extract_warnings, extract_debug = _extract_records_from_source(
+            source, template_intent, mapping_hints=mapping_hints
+        )
         all_records.extend(source_records)
         warnings.extend(extract_warnings)
         for sn, cnt in (extract_debug.get("remove_sheet_counts_before_filter") or {}).items():
@@ -1728,7 +1904,7 @@ def build_social_security_fill_plan(
         }],
         "writes": [],
         "warnings": warnings,
-        "llm_used": False,
+        "llm_used": bool(use_llm_mapping and any(v for v in mapping_hints.values())),
         "constant_values_count": 0,
     }
     
