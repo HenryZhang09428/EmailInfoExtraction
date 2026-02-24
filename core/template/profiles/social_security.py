@@ -1237,8 +1237,12 @@ def _extract_records_from_source(
     records: List[Dict[str, Any]] = []
     warnings: List[str] = []
     debug_info: Dict[str, Any] = {
+        "add_sheet_counts_before_filter": {},
+        "add_sheet_counts_after_filter": {},
+        "add_sheet_counts_blocked": {},
         "remove_sheet_counts_before_filter": {},
         "remove_sheet_counts_after_filter": {},
+        "remove_sheet_counts_blocked": {},
         "date_key_fallback_hits": 0,
     }
     
@@ -1254,14 +1258,19 @@ def _extract_records_from_source(
     source_type = source.get("source_type", "unknown")
     source_id = source.get("source_id", "")
 
-    if intent == "remove":
+    if intent in ("add", "remove"):
         for item in data:
             if not isinstance(item, dict):
                 continue
             sheet_name = str(item.get("__sheet_name__", "") or "")
-            debug_info["remove_sheet_counts_before_filter"][sheet_name] = (
-                debug_info["remove_sheet_counts_before_filter"].get(sheet_name, 0) + 1
-            )
+            if intent == "add":
+                debug_info["add_sheet_counts_before_filter"][sheet_name] = (
+                    debug_info["add_sheet_counts_before_filter"].get(sheet_name, 0) + 1
+                )
+            else:
+                debug_info["remove_sheet_counts_before_filter"][sheet_name] = (
+                    debug_info["remove_sheet_counts_before_filter"].get(sheet_name, 0) + 1
+                )
     
     default_name_keys = ["name", "姓名", "员工姓名", "参保人"]
     default_id_keys = ["id_number", "身份证号", "证件号码", "employee_id", "工号"]
@@ -1337,12 +1346,38 @@ def _extract_records_from_source(
         if intent == "add" and record_intent and record_intent != "add":
             continue
 
+        sheet_name = str(item.get("__sheet_name__", "") or "")
+        sheet_name_norm = _normalize_header_text(sheet_name)
         if intent == "remove":
-            sheet_name = str(item.get("__sheet_name__", "") or "")
-            if not any(k in sheet_name for k in ("减员", "离职")):
+            remove_allow_keywords = ("减员", "离职")
+            remove_block_keywords = ("增员", "新增", "入职")
+            if any(k in sheet_name_norm for k in remove_block_keywords):
+                debug_info["remove_sheet_counts_blocked"][sheet_name] = (
+                    debug_info["remove_sheet_counts_blocked"].get(sheet_name, 0) + 1
+                )
+                continue
+            if not any(k in sheet_name_norm for k in remove_allow_keywords):
+                debug_info["remove_sheet_counts_blocked"][sheet_name] = (
+                    debug_info["remove_sheet_counts_blocked"].get(sheet_name, 0) + 1
+                )
                 continue
             debug_info["remove_sheet_counts_after_filter"][sheet_name] = (
                 debug_info["remove_sheet_counts_after_filter"].get(sheet_name, 0) + 1
+            )
+        elif intent == "add":
+            add_allow_keywords = ("增员", "新增", "入职")
+            add_block_keywords = ("减员", "离职", "停保")
+            if any(k in sheet_name_norm for k in add_block_keywords):
+                debug_info["add_sheet_counts_blocked"][sheet_name] = (
+                    debug_info["add_sheet_counts_blocked"].get(sheet_name, 0) + 1
+                )
+                continue
+            # Unknown sheet names are still allowed to avoid over-filtering;
+            # we only hard-block known remove-like sheets for add templates.
+            if sheet_name_norm and not any(k in sheet_name_norm for k in add_allow_keywords):
+                warnings.append(f"add_sheet_name_neutral_kept:{sheet_name}")
+            debug_info["add_sheet_counts_after_filter"][sheet_name] = (
+                debug_info["add_sheet_counts_after_filter"].get(sheet_name, 0) + 1
             )
         
         name = _get_record_value(item, name_key)
@@ -1687,8 +1722,12 @@ def build_social_security_fill_plan(
             for s in source_scores
         ],
     }
+    debug_info["add_sheet_counts_before_filter"] = {}
+    debug_info["add_sheet_counts_after_filter"] = {}
+    debug_info["add_sheet_counts_blocked"] = {}
     debug_info["remove_sheet_counts_before_filter"] = {}
     debug_info["remove_sheet_counts_after_filter"] = {}
+    debug_info["remove_sheet_counts_blocked"] = {}
     debug_info["date_key_fallback_hits"] = 0
     
     all_records: List[Dict[str, Any]] = []
@@ -1698,6 +1737,18 @@ def build_social_security_fill_plan(
         )
         all_records.extend(source_records)
         warnings.extend(extract_warnings)
+        for sn, cnt in (extract_debug.get("add_sheet_counts_before_filter") or {}).items():
+            debug_info["add_sheet_counts_before_filter"][sn] = (
+                debug_info["add_sheet_counts_before_filter"].get(sn, 0) + int(cnt or 0)
+            )
+        for sn, cnt in (extract_debug.get("add_sheet_counts_after_filter") or {}).items():
+            debug_info["add_sheet_counts_after_filter"][sn] = (
+                debug_info["add_sheet_counts_after_filter"].get(sn, 0) + int(cnt or 0)
+            )
+        for sn, cnt in (extract_debug.get("add_sheet_counts_blocked") or {}).items():
+            debug_info["add_sheet_counts_blocked"][sn] = (
+                debug_info["add_sheet_counts_blocked"].get(sn, 0) + int(cnt or 0)
+            )
         for sn, cnt in (extract_debug.get("remove_sheet_counts_before_filter") or {}).items():
             debug_info["remove_sheet_counts_before_filter"][sn] = (
                 debug_info["remove_sheet_counts_before_filter"].get(sn, 0) + int(cnt or 0)
@@ -1705,6 +1756,10 @@ def build_social_security_fill_plan(
         for sn, cnt in (extract_debug.get("remove_sheet_counts_after_filter") or {}).items():
             debug_info["remove_sheet_counts_after_filter"][sn] = (
                 debug_info["remove_sheet_counts_after_filter"].get(sn, 0) + int(cnt or 0)
+            )
+        for sn, cnt in (extract_debug.get("remove_sheet_counts_blocked") or {}).items():
+            debug_info["remove_sheet_counts_blocked"][sn] = (
+                debug_info["remove_sheet_counts_blocked"].get(sn, 0) + int(cnt or 0)
             )
         debug_info["date_key_fallback_hits"] = int(debug_info.get("date_key_fallback_hits", 0) or 0) + int(
             extract_debug.get("date_key_fallback_hits", 0) or 0

@@ -93,6 +93,51 @@ def test_strategy_key_routes_to_social_security_llm_mapping():
     assert (fill_plan.debug or {}).get("strategy_routed") is True
 
 
+def test_social_security_template_routes_to_llm_mapping_without_explicit_strategy():
+    schema = _build_social_security_template_schema()
+    llm = MockLLM(
+        {
+            "target_field_to_source_key": {
+                "name": "员工姓名",
+                "id_number": "证件号码",
+                "event_date": "离职日期",
+            },
+            "confidence": 0.92,
+            "warnings": [],
+        }
+    )
+    extracted = {
+        "sources": [
+            {
+                "filename": "离职通知.xlsx",
+                "source_type": "excel",
+                "extracted": {
+                    "data": [
+                        {
+                            "员工姓名": "张三",
+                            "证件号码": "110101199001011234",
+                            "离职日期": "2025-11-01",
+                            "intent": "remove",
+                            "__sheet_name__": "十一月减员",
+                        }
+                    ]
+                },
+            }
+        ],
+        "merged": {},
+    }
+    fill_plan = plan_fill(
+        schema,
+        extracted,
+        llm,
+        template_filename="减员模板.xlsx",
+    )
+    rows = _extract_rows(fill_plan)
+    assert len(rows) == 1
+    assert (fill_plan.debug or {}).get("strategy_key") == "social_security_llm_mapping"
+    assert (fill_plan.debug or {}).get("strategy_routed") is True
+
+
 def test_llm_invalid_mapping_falls_back_to_heuristics():
     schema = _build_social_security_template_schema()
     llm = MockLLM(
@@ -136,3 +181,103 @@ def test_llm_invalid_mapping_falls_back_to_heuristics():
     rows = _extract_rows(fill_plan)
     assert len(rows) == 1
     assert any("llm_mapping" in w for w in fill_plan.warnings)
+
+
+def test_add_template_filters_out_remove_sheet_rows():
+    schema = _build_social_security_template_schema()
+    llm = MockLLM(
+        {
+            "target_field_to_source_key": {
+                "name": "员工姓名",
+                "id_number": "证件号码",
+                "event_date": "入职日期",
+            },
+            "confidence": 0.91,
+            "warnings": [],
+        }
+    )
+    extracted = {
+        "sources": [
+            {
+                "filename": "人员异动总表.xlsx",
+                "source_type": "excel",
+                "extracted": {
+                    "data": [
+                        {
+                            "员工姓名": "王五",
+                            "证件号码": "110101199401011234",
+                            "入职日期": "2025-10-02",
+                            "__sheet_name__": "10月增员名单",
+                        },
+                        {
+                            "员工姓名": "赵六",
+                            "证件号码": "110101199402021234",
+                            "离职日期": "2025-10-20",
+                            "__sheet_name__": "10月减员名单",
+                        },
+                    ]
+                },
+            }
+        ],
+        "merged": {},
+    }
+    fill_plan = plan_fill(
+        schema,
+        extracted,
+        llm,
+        template_filename="增员模板.xlsx",
+        planner_options={"template": {"strategy_key": "social_security_llm_mapping"}},
+    )
+    rows = _extract_rows(fill_plan)
+    assert len(rows) == 1
+    assert rows[0].get("__name__") == "王五"
+
+
+def test_remove_template_filters_out_add_sheet_rows():
+    schema = _build_social_security_template_schema()
+    llm = MockLLM(
+        {
+            "target_field_to_source_key": {
+                "name": "员工姓名",
+                "id_number": "证件号码",
+                "event_date": "离职日期",
+            },
+            "confidence": 0.91,
+            "warnings": [],
+        }
+    )
+    extracted = {
+        "sources": [
+            {
+                "filename": "人员异动总表.xlsx",
+                "source_type": "excel",
+                "extracted": {
+                    "data": [
+                        {
+                            "员工姓名": "王五",
+                            "证件号码": "110101199401011234",
+                            "入职日期": "2025-10-02",
+                            "__sheet_name__": "10月增员名单",
+                        },
+                        {
+                            "员工姓名": "赵六",
+                            "证件号码": "110101199402021234",
+                            "离职日期": "2025-10-20",
+                            "__sheet_name__": "10月减员名单",
+                        },
+                    ]
+                },
+            }
+        ],
+        "merged": {},
+    }
+    fill_plan = plan_fill(
+        schema,
+        extracted,
+        llm,
+        template_filename="减员模板.xlsx",
+        planner_options={"template": {"strategy_key": "social_security_llm_mapping"}},
+    )
+    rows = _extract_rows(fill_plan)
+    assert len(rows) == 1
+    assert rows[0].get("__name__") == "赵六"

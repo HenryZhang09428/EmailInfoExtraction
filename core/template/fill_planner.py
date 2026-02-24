@@ -126,6 +126,7 @@ def plan_fill(
         planner_options=planner_options,
         require_llm=require_llm,
     )
+    strategy_errors: List[str] = []
     if strategy_resolution.strategy is not None:
         try:
             planned = strategy_resolution.strategy(
@@ -143,40 +144,22 @@ def plan_fill(
                 planned.debug = dbg
                 return planned
         except Exception as exc:
-            logger.warning("Template strategy failed, fallback to legacy routing: %s", exc)
+            logger.warning("Template strategy failed, continue with generic routing: %s", exc)
+            strategy_errors.append(f"strategy_execution_failed:{type(exc).__name__}")
 
-    # 从文件名推断意图（legacy 路由）
+    # 从文件名推断意图（generic 路由）
     template_intent = logic.infer_intent_from_filename(template_filename or "")
     if not template_intent:
-        return FillPlan(target=FillPlanTarget(), warnings=["insurance_intent_unknown"], llm_used=False)
-
-    # 优先: 社保专用 profile
-    try:
-        from core.template.profiles.social_security import (
-            detect_social_security_template,
-            build_social_security_fill_plan,
-        )
-        profile = detect_social_security_template(template_schema)
-        if profile.is_detected:
-            logger.info("Social security template detected: %s (intent=%s)", template_filename, template_intent)
-            return build_social_security_fill_plan(
-                template_schema,
-                extracted_json,
-                llm,
-                template_filename or "",
-                profile,
-                template_intent,
-                planner_options=planner_options,
-            )
-    except ImportError:
-        logger.debug("Social security profile module not available")
-    except Exception as e:
-        logger.warning("Social security profile detection failed: %s", e)
+        warnings = strategy_errors + ["insurance_intent_unknown"]
+        return FillPlan(target=FillPlanTarget(), warnings=warnings, llm_used=False)
 
     # 保险模板规划
-    return _plan_insurance_template_with_llm(
+    fallback_plan = _plan_insurance_template_with_llm(
         template_schema, extracted_json, llm, template_filename, template_intent, cfg=cfg
     )
+    if strategy_errors:
+        fallback_plan.warnings = list(fallback_plan.warnings or []) + strategy_errors
+    return fallback_plan
 
 
 ###############################################################################

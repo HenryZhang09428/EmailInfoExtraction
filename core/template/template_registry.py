@@ -32,38 +32,6 @@ class TemplateRegistration:
     signature: Dict[str, Any] = field(default_factory=dict)
 
 
-def _social_security_legacy_strategy(
-    template_schema: TemplateSchema,
-    extracted_json: Dict[str, Any],
-    llm: LLMClient,
-    template_filename: Optional[str],
-    context: StrategyContext,
-) -> FillPlan:
-    from core.template.profiles.social_security import (
-        build_social_security_fill_plan,
-        detect_social_security_template,
-    )
-
-    profile = detect_social_security_template(template_schema)
-    if not profile.is_detected:
-        return FillPlan(
-            target=FillPlanTarget(),
-            warnings=["social_security_profile_not_detected"],
-            llm_used=False,
-            debug={"planner_mode": "social_security_legacy_strategy"},
-        )
-    return build_social_security_fill_plan(
-        template_schema,
-        extracted_json,
-        llm,
-        template_filename or "",
-        profile,
-        profile.template_intent or _infer_intent_from_filename(template_filename),
-        planner_options=context.planner_options,
-        use_llm_mapping=False,
-    )
-
-
 def _social_security_llm_mapping_strategy(
     template_schema: TemplateSchema,
     extracted_json: Dict[str, Any],
@@ -97,7 +65,6 @@ def _social_security_llm_mapping_strategy(
 
 
 _BUILTIN_STRATEGIES: Dict[str, TemplateStrategy] = {
-    "social_security_legacy": _social_security_legacy_strategy,
     "social_security_llm_mapping": _social_security_llm_mapping_strategy,
 }
 
@@ -181,7 +148,6 @@ def resolve_strategy(
     planner_options: Optional[Dict[str, Any]],
     require_llm: bool,
 ) -> ResolvedStrategy:
-    del template_schema  # reserved for future signature-based matching
     template_options = _safe_template_options(planner_options)
     template_key = template_options.get("template_key")
     strategy_key = template_options.get("strategy_key")
@@ -201,6 +167,20 @@ def resolve_strategy(
         resolved_strategy_key = strategy_key.strip()
     elif registration is not None:
         resolved_strategy_key = registration.strategy_key
+    else:
+        try:
+            from core.template.profiles.social_security import detect_social_security_template
+
+            profile = detect_social_security_template(template_schema)
+            if profile.is_detected:
+                resolved_strategy_key = "social_security_llm_mapping"
+        except Exception:
+            # Keep resolver robust: if profile detection fails, strategy remains unresolved.
+            resolved_strategy_key = None
+
+    if resolved_strategy_key == "social_security_legacy":
+        logger.warning("strategy_key 'social_security_legacy' is deprecated, using social_security_llm_mapping")
+        resolved_strategy_key = "social_security_llm_mapping"
 
     resolved_strategy: Optional[TemplateStrategy] = None
     if isinstance(strategy_plugin, str) and strategy_plugin.strip():

@@ -43,9 +43,9 @@ templates:
     # 例如: social_security_default
     template_key: "social_security_default"
 
-    # strategy_key: 填充策略（可选，优先级高于 template_key 里的默认策略）
-    # 可选内置值: social_security_legacy / social_security_llm_mapping
-    strategy_key: "social_security_llm_mapping"
+    # strategy_key: 填充策略（可选）
+    # 默认已自动走 LLM mapping；通常无需显式配置
+    # strategy_key: "social_security_llm_mapping"
 
     # template_path: 模板文件路径（xlsx）
     # 可写相对路径（相对项目根）或绝对路径
